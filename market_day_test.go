@@ -7,11 +7,11 @@ import (
 
 func TestKnownMarketDays(t *testing.T) {
 	days := []time.Time{
-		day(2023, 01, 03),
-		day(2023, 04, 18),
-		day(2023, 06, 22),
-		day(2023, 10, 31),
-		day(2023, 11, 24),
+		Day(2023, 01, 03),
+		Day(2023, 04, 18),
+		Day(2023, 06, 22),
+		Day(2023, 10, 31),
+		Day(2023, 11, 24),
 	}
 
 	for _, day := range days {
@@ -24,11 +24,11 @@ func TestKnownMarketDays(t *testing.T) {
 
 func TestKnownNonMarketDays(t *testing.T) {
 	days := []time.Time{
-		day(2023, 01, 02),
-		day(2023, 02, 18),
-		day(2023, 04, 06),
-		day(2023, 10, 31),
-		day(2023, 11, 22),
+		Day(2023, 01, 02),
+		Day(2023, 02, 18),
+		Day(2023, 04, 07),
+		Day(2023, 10, 29),
+		Day(2023, 11, 23),
 	}
 
 	for _, day := range days {
