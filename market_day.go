@@ -23,7 +23,7 @@ var holidays = map[time.Time]bool{
 	Day(2023, 12, 25): true,
 }
 
-var early_days = map[time.Time]bool{
+var half_days = map[time.Time]bool{
 	Day(2023, 7, 3):   true,
 	Day(2023, 11, 24): true,
 }
@@ -36,10 +36,18 @@ func IsMarketDay(date time.Time) bool {
 	return isTradingDay(date) && !isHoliday(date)
 }
 
+func IsFullMarketDay(date time.Time) bool {
+	return IsMarketDay(date) && !isHalfDay(date)
+}
+
 func isTradingDay(date time.Time) bool {
 	return trading_days&(1<<date.Weekday()) != 0
 }
 
 func isHoliday(date time.Time) bool {
 	return holidays[date]
+}
+
+func isHalfDay(date time.Time) bool {
+	return half_days[date]
 }
