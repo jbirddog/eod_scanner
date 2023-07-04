@@ -32,12 +32,25 @@ func Day(year int, month time.Month, day int) time.Time {
 	return time.Date(year, month, day, 15, 0, 0, 0, time.UTC)
 }
 
-func PreviousMarketDay(from time.Time) time.Time {
-	date := from.AddDate(0, 0, -1)
+func PreviousMarketDay(date time.Time) time.Time {
+	date = date.AddDate(0, 0, -1)
+
 	for !IsMarketDay(date) {
 		date = date.AddDate(0, 0, -1)
 	}
+
 	return date
+}
+
+func PreviousMarketDays(date time.Time, count int) []time.Time {
+	days := make([]time.Time, 0, count)
+
+	for len(days) < count {
+		date = PreviousMarketDay(date)
+		days = append(days, date)
+	}
+
+	return days
 }
 
 func IsMarketDay(date time.Time) bool {
