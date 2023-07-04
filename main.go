@@ -7,12 +7,12 @@ import (
 )
 
 func main() {
-	data_dir := os.Getenv("EOD_DATA_DIR")
-	if data_dir == "" {
+	dataDir := os.Getenv("EOD_DATA_DIR")
+	if dataDir == "" {
 		log.Fatal("Must set environment variable EOD_DATA_DIR")
 	}
-	
+
 	date := Day(2023, 5, 18)
-	data := LoadEODFile(data_dir, "NASDAQ", date)
-	fmt.Printf("scanned %d...\n", len(data))
+	rawData := LoadEODFile(dataDir, "NASDAQ", date)
+	fmt.Printf("scanned %d...\n", len(rawData))
 }
