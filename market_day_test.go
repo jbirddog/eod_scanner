@@ -73,23 +73,6 @@ func TestPreviousMarketDay(t *testing.T) {
 	}
 }
 
-/*
-
-my @dates = (
-    '2023-01-03'.Date => ('2022-12-30'.Date, '2022-12-29'.Date),
-    '2023-04-18'.Date => ('2023-04-17'.Date,),
-    '2023-07-01'.Date => (
-      '2023-06-30'.Date,
-      '2023-06-29'.Date,
-      '2023-06-28'.Date,
-      '2023-06-27'.Date,
-      '2023-06-26'.Date,
-      '2023-06-23'.Date,
-    ),
-  );
-
-*/
-
 func TestPreviousMarketDays(t *testing.T) {
 	cases := []struct {
 		start    time.Time

@@ -14,5 +14,5 @@ tests:
 	go test
 
 .PHONY: start
-start:
-	go run main.go
+start: compile
+	time ./eod_scanner
