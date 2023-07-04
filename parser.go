@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -48,7 +49,7 @@ func parseRow(row string) (*EODData, error) {
 	parts := strings.Split(row, ",")
 
 	if len(parts) != 7 {
-		return nil, errors.New("Expected record to have seven fields")
+		return nil, errors.New("Expected record to have 7 fields")
 	}
 
 	symbol := parts[0]
@@ -58,9 +59,22 @@ func parseRow(row string) (*EODData, error) {
 		return nil, err
 	}
 
+	var prices [4]float64
+	err = parsePrices(parts[2:6], &prices)
+
+volume, err := strconv.Atoi(parts[6])
+if err != nil {
+return nil, err
+}
+
 	data := &EODData{
 		Symbol: symbol,
 		Date:   date,
+		Open:   prices[0],
+		High: prices[1],
+		Low: prices[2],
+		Close: prices[3],
+		Volume: volume,
 	}
 
 	return data, nil
@@ -73,4 +87,20 @@ func parseDate(field string) (time.Time, error) {
 	}
 
 	return date, err
+}
+
+func parsePrices(fields []string, prices *[4]float64) error {
+	if len(fields) != 4 {
+		return errors.New("Expected 4 price fields")
+	}
+
+	for i, f := range fields {
+		price, err := strconv.ParseFloat(f, 64)
+		if err != nil {
+			return err
+		}
+		prices[i] = price
+	}
+
+	return nil
 }
