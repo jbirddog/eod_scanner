@@ -62,18 +62,18 @@ func parseRow(row string) (*EODData, error) {
 	var prices [4]float64
 	err = parsePrices(parts[2:6], &prices)
 
-volume, err := strconv.Atoi(parts[6])
-if err != nil {
-return nil, err
-}
+	volume, err := strconv.Atoi(parts[6])
+	if err != nil {
+		return nil, err
+	}
 
 	data := &EODData{
 		Symbol: symbol,
 		Date:   date,
 		Open:   prices[0],
-		High: prices[1],
-		Low: prices[2],
-		Close: prices[3],
+		High:   prices[1],
+		Low:    prices[2],
+		Close:  prices[3],
 		Volume: volume,
 	}
 
