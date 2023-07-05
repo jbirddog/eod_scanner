@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 )
@@ -12,20 +11,21 @@ func main() {
 		log.Fatal("Must set environment variable EOD_DATA_DIR")
 	}
 
-	// TODO: move to driver
-	date := Day(2023, 5, 18)
+	dates := PreviousMarketDays(Day(2023, 07, 02), 30)
+	exchange := "NASDAQ"
+	var eodData [30][]*EODData
 
-	rawData, err := LoadEODFile(dataDir, "NASDAQ", date)
-	if err != nil {
-		log.Fatal(err)
+	for i, date := range dates {
+		rawData, err := LoadEODFile(dataDir, exchange, date)
+		if err != nil {
+			log.Fatal(err)
+		}
+		
+		data, err := ParseEODFile(rawData)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		eodData[i] = data
 	}
-
-	fmt.Printf("scanned %d...\n", len(rawData))
-
-	data, err := ParseEODFile(rawData)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("parsed %d...\n", len(data))
 }
