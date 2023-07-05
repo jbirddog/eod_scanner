@@ -60,8 +60,7 @@ func parseRow(row string) (*EODData, error) {
 	}
 
 	var prices [4]float64
-	err = parsePrices(parts[2:6], &prices)
-	if err != nil {
+	if err := parsePrices(parts[2:6], &prices); err != nil {
 		return nil, err
 	}
 
