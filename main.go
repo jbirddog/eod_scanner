@@ -48,5 +48,5 @@ func main() {
 		}
 	}
 
-	log.Fatalf("%d , %d of %d", c, d, len(analyzedDataBySymbol))
+	log.Fatalf("%d , %d of %d (%f) %d", c, d, len(analyzedDataBySymbol), analyzedDataBySymbol["AMD"].SMA20, analyzedDataBySymbol["AMD"].AvgVolume)
 }

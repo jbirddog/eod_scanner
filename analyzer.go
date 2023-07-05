@@ -1,12 +1,13 @@
 package main
 
 import (
-"sort"
+	"sort"
 )
 
 type AnalyzedData struct {
 	DataPoints int
 	AvgVolume  int
+	SMA20      float64
 	EODData    []*EODData
 }
 
@@ -34,16 +35,30 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 	for i, dailyData := range eodData {
 		for _, record := range dailyData {
 			data := analyzedDataForSymbol(record.Symbol)
-			addEODData(data, record, i)
+			addEODData(data, record, i, days)
 		}
 	}
 
 	return analyzed
 }
 
-func addEODData(data *AnalyzedData, record *EODData, slot int) {
-	data.AvgVolume = (data.AvgVolume*data.DataPoints + record.Volume) / (data.DataPoints + 1)
+func addEODData(data *AnalyzedData, record *EODData, day int, days int) {
+	performConstantTimeCalculations(data, record, day, days)
 
-	data.EODData[slot] = record
+	data.EODData[day] = record
 	data.DataPoints += 1
+}
+
+func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day int, days int) {
+	data.AvgVolume = runningAvg(data.AvgVolume, data.DataPoints, record.Volume)
+
+	if days-day < 20 {
+		data.SMA20 = runningAvg(data.SMA20, float64(data.DataPoints), record.Close)
+	} else {
+		data.SMA20 = record.Close
+	}
+}
+
+func runningAvg[T int | float64](current T, n T, new T) T {
+	return (current*n + new) / (n + 1)
 }
