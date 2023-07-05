@@ -5,22 +5,26 @@ import (
 	"os"
 )
 
+const marketDayCount = 30
+
 func main() {
 	dataDir := os.Getenv("EOD_DATA_DIR")
 	if dataDir == "" {
 		log.Fatal("Must set environment variable EOD_DATA_DIR")
 	}
 
-	dates := PreviousMarketDays(Day(2023, 07, 02), 30)
+	// TODO: move to driver, use channels
+	dates := PreviousMarketDays(Day(2023, 07, 02), marketDayCount)
+	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
-	var eodData [30][]*EODData
+	eodData := make([][]*EODData, marketDayCount)
 
 	for i, date := range dates {
 		rawData, err := LoadEODFile(dataDir, exchange, date)
 		if err != nil {
 			log.Fatal(err)
 		}
-		
+
 		data, err := ParseEODFile(rawData)
 		if err != nil {
 			log.Fatal(err)
@@ -28,4 +32,21 @@ func main() {
 
 		eodData[i] = data
 	}
+
+	analyzedDataBySymbol := Analyze(eodData)
+
+	c := 0
+	d := 0
+
+	for _, v := range analyzedDataBySymbol {
+		if v.DataPoints == marketDayCount {
+			c += 1
+
+			if v.AvgVolume >= 500000 {
+				d += 1
+			}
+		}
+	}
+
+	log.Fatalf("%d , %d of %d", c, d, len(analyzedDataBySymbol))
 }
