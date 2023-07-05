@@ -88,6 +88,54 @@ func TestParseMinimalEODFile(t *testing.T) {
 			},
 			nil,
 		},
+		// invalid input - bad date
+		{
+			[]string{
+				"Symbol,Date,Open,High,Low,Close,Volume",
+				"VIA,bob,7,7.1846,6.69,6.96,61000",
+			},
+			nil,
+		},
+		// invalid input - bad open
+		{
+			[]string{
+				"Symbol,Date,Open,High,Low,Close,Volume",
+				"VIA,30-Jun-2023,XXX,7.1846,6.69,6.96,61000",
+			},
+			nil,
+		},
+		// invalid input - bad high
+		{
+			[]string{
+				"Symbol,Date,Open,High,Low,Close,Volume",
+				"VIA,30-Jun-2023,7,XXX,6.69,6.96,61000",
+			},
+			nil,
+		},
+		// invalid input - bad low
+		{
+			[]string{
+				"Symbol,Date,Open,High,Low,Close,Volume",
+				"VIA,30-Jun-2023,7,5,XXX,6.96,61000",
+			},
+			nil,
+		},
+		// invalid input - bad close
+		{
+			[]string{
+				"Symbol,Date,Open,High,Low,Close,Volume",
+				"VIA,30-Jun-2023,7,5,3,XXX,61000",
+			},
+			nil,
+		},
+		// invalid input - bad volume
+		{
+			[]string{
+				"Symbol,Date,Open,High,Low,Close,Volume",
+				"VIA,30-Jun-2023,7,5,3,1000,XXX",
+			},
+			nil,
+		},
 	}
 
 	for i, c := range cases {
@@ -106,7 +154,7 @@ func TestParseMinimalEODFile(t *testing.T) {
 		}
 
 		if len(actual) != len(c.expected) {
-			t.Fatalf("[%d] Expected len of %d, got %d", i, len(c.expected), len(actual))
+			t.Fatalf("[%d] Expected %v, got %v", i, c.expected, actual)
 		}
 
 		for j, a := range actual {

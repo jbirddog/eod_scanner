@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"path"
 	"time"
@@ -14,11 +13,11 @@ func EODFilePath(dir string, exchange string, date time.Time) string {
 	return path.Join(dir, file_name)
 }
 
-func LoadEODFile(dir string, exchange string, date time.Time) []string {
+func LoadEODFile(dir string, exchange string, date time.Time) ([]string, error) {
 	path := EODFilePath(dir, exchange, date)
 	file, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer file.Close()
 
@@ -30,8 +29,8 @@ func LoadEODFile(dir string, exchange string, date time.Time) []string {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return lines
+	return lines, nil
 }

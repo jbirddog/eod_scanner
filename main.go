@@ -13,6 +13,11 @@ func main() {
 	}
 
 	date := Day(2023, 5, 18)
-	rawData := LoadEODFile(dataDir, "NASDAQ", date)
+
+	rawData, err := LoadEODFile(dataDir, "NASDAQ", date)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Printf("scanned %d...\n", len(rawData))
 }
