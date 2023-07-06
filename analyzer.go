@@ -5,16 +5,16 @@ import (
 )
 
 type AnalyzedData struct {
-	DataPoints int
-	AvgVolume  int
-	AvgClose   float64
-	MACDSignalLine       float64
-	MACDLine float64
-	EMA12      float64
-	EMA26      float64
-	SMA20      float64
-	LastClose  float64
-	EODData    []*EODData
+	DataPoints     int
+	AvgVolume      int
+	AvgClose       float64
+	MACDSignalLine float64
+	MACDLine       float64
+	EMA12          float64
+	EMA26          float64
+	SMA20          float64
+	LastClose      float64
+	EODData        []*EODData
 }
 
 type AnalyzedDataBySymbol = map[string]*AnalyzedData
