@@ -37,6 +37,7 @@ func main() {
 
 	c := 0
 	d := 0
+	e := 0
 
 	for _, v := range analyzedDataBySymbol {
 		if v.DataPoints == marketDayCount {
@@ -44,9 +45,13 @@ func main() {
 
 			if v.AvgVolume >= 500000 {
 				d += 1
+
+				if v.SMA20 >= v.LastClose {
+					e += 1
+				}
 			}
 		}
 	}
 
-	log.Fatalf("%d , %d of %d (%f) %d", c, d, len(analyzedDataBySymbol), analyzedDataBySymbol["AMD"].SMA20, analyzedDataBySymbol["AMD"].AvgVolume)
+	log.Fatalf("%d , %d , %d of %d (%f) %d", c, d, e, len(analyzedDataBySymbol), analyzedDataBySymbol["AMD"].SMA20, analyzedDataBySymbol["AMD"].AvgVolume)
 }

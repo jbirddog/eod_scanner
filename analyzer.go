@@ -7,7 +7,11 @@ import (
 type AnalyzedData struct {
 	DataPoints int
 	AvgVolume  int
+	EMA9       float64
+	EMA12      float64
+	EMA26      float64
 	SMA20      float64
+	LastClose  float64
 	EODData    []*EODData
 }
 
@@ -47,12 +51,18 @@ func addEODData(data *AnalyzedData, record *EODData, day int, days int) {
 
 	data.EODData[day] = record
 	data.DataPoints += 1
+	data.LastClose = record.Close
 }
 
 func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day int, days int) {
 	data.AvgVolume = runningAvg(data.AvgVolume, data.DataPoints, record.Volume)
+	daysRemaining := days - day
 
-	if days-day < 20 {
+	// these values are imperfect but close enough for what we are trying to do.
+	// we arn't bot trading here, just trying to trim down from 10Ks of symbols to many
+	// dozen of symbols to manually look at charts
+
+	if daysRemaining < 20 {
 		data.SMA20 = runningAvg(data.SMA20, float64(data.DataPoints), record.Close)
 	} else {
 		data.SMA20 = record.Close
