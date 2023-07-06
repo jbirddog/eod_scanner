@@ -7,7 +7,9 @@ import (
 type AnalyzedData struct {
 	DataPoints int
 	AvgVolume  int
-	EMA9       float64
+	AvgClose   float64
+	MACDSignalLine       float64
+	MACDLine float64
 	EMA12      float64
 	EMA26      float64
 	SMA20      float64
@@ -55,20 +57,47 @@ func addEODData(data *AnalyzedData, record *EODData, day int, days int) {
 }
 
 func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day int, days int) {
-	data.AvgVolume = runningAvg(data.AvgVolume, data.DataPoints, record.Volume)
+	dp := data.DataPoints
+	dpF := float64(dp)
+	data.AvgVolume = runningAvg(data.AvgVolume, dp, record.Volume)
+	data.AvgClose = runningAvg(data.AvgClose, dpF, record.Close)
 	daysRemaining := days - day
 
 	// these values are imperfect but close enough for what we are trying to do.
 	// we arn't bot trading here, just trying to trim down from 10Ks of symbols to many
 	// dozen of symbols to manually look at charts
 
+	if daysRemaining < 26 {
+		data.EMA26 = ema(26, data.EMA26, record.Close)
+	} else {
+		data.EMA26 = data.AvgClose
+	}
+
 	if daysRemaining < 20 {
-		data.SMA20 = runningAvg(data.SMA20, float64(data.DataPoints), record.Close)
+		data.SMA20 = runningAvg(data.SMA20, dpF, record.Close)
 	} else {
 		data.SMA20 = record.Close
+	}
+
+	if daysRemaining < 12 {
+		data.EMA12 = ema(12, data.EMA12, record.Close)
+		data.MACDLine = data.EMA12 - data.EMA26
+	} else {
+		data.EMA12 = data.SMA20
+	}
+
+	if daysRemaining < 9 {
+		data.MACDSignalLine = ema(9, data.MACDSignalLine, data.MACDLine)
+	} else {
+		data.MACDSignalLine = data.MACDLine
 	}
 }
 
 func runningAvg[T int | float64](current T, n T, new T) T {
 	return (current*n + new) / (n + 1)
+}
+
+func ema(days int, current float64, new float64) float64 {
+	weight := 2.0 / (1.0 + float64(days))
+	return (new * weight) + (current * (1.0 - weight))
 }
