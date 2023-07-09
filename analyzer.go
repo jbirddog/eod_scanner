@@ -4,14 +4,25 @@ import (
 	"sort"
 )
 
+type SMA struct {
+	Periods    int
+	DataPoints int
+	Cumulative float64
+	Value      float64
+}
+
 type AnalyzedData struct {
+	Symbol         string
 	DataPoints     int
 	AvgVolume      int
 	AvgClose       float64
 	MACDSignalLine float64
 	MACDLine       float64
+	MACDWasNeg     bool
+	MACDIsPos      bool
 	EMA12          float64
 	EMA26          float64
+	SMA20_X        SMA
 	SMA20          float64
 	LastClose      float64
 	EODData        []*EODData
@@ -27,8 +38,10 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 		data, found := analyzed[symbol]
 		if !found {
 			data = &AnalyzedData{
+				Symbol:  symbol,
 				EODData: make([]*EODData, days),
 			}
+			data.SMA20_X.Periods = 20
 			analyzed[symbol] = data
 		}
 		return data
@@ -79,6 +92,17 @@ func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day in
 		data.SMA20 = record.Close
 	}
 
+	if day < 20 {
+		data.SMA20_X.Cumulative += record.Close
+	} else {
+		lookBack := data.EODData[day-20]
+		if lookBack != nil {
+			data.SMA20_X.Cumulative -= lookBack.Close
+			data.SMA20_X.Cumulative += record.Close
+			data.SMA20_X.Value = data.SMA20_X.Cumulative / float64(data.SMA20_X.Periods)
+		}
+	}
+
 	if daysRemaining < 12 {
 		data.EMA12 = ema(12, data.EMA12, record.Close)
 		data.MACDLine = data.EMA12 - data.EMA26
@@ -88,6 +112,11 @@ func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day in
 
 	if daysRemaining < 9 {
 		data.MACDSignalLine = ema(9, data.MACDSignalLine, data.MACDLine)
+		isNeg := data.MACDLine < 0 || data.MACDSignalLine < 0
+		if isNeg {
+			data.MACDWasNeg = true
+		}
+		data.MACDIsPos = !isNeg
 	} else {
 		data.MACDSignalLine = data.MACDLine
 	}

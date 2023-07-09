@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -14,7 +15,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	dates := PreviousMarketDays(Day(2023, 07, 02), marketDayCount)
+	dates := PreviousMarketDays(Day(2023, 07, 06), marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
@@ -35,33 +36,22 @@ func main() {
 
 	analyzedDataBySymbol := Analyze(eodData)
 
-	c := 0
-	d := 0
-	e := 0
-
-	for _, v := range analyzedDataBySymbol {
-		if v.DataPoints == marketDayCount {
-			c += 1
-
-			if v.AvgVolume >= 500000 && v.AvgClose >= 5.0 {
-				d += 1
-
-				if v.SMA20 >= v.LastClose {
-					e += 1
-				}
-			}
+	for k, v := range analyzedDataBySymbol {
+		if v.DataPoints != marketDayCount || v.AvgVolume < 500000 || v.AvgClose < 5.0 {
+			continue
 		}
+
+		if !v.MACDWasNeg || !v.MACDIsPos {
+			continue
+		}
+
+		fmt.Printf("%s: (%f %f) %d (%f %f %f)\n",
+			k,
+			v.SMA20,
+			v.SMA20_X.Value,
+			v.AvgVolume,
+			v.EMA26,
+			v.MACDLine,
+			v.MACDSignalLine)
 	}
-
-	s := "META"
-	a := analyzedDataBySymbol[s]
-
-	log.Fatalf("%s: %d , %d , %d of %d (%f) %d (%f %f %f)",
-		s, c, d, e,
-		len(analyzedDataBySymbol),
-		a.SMA20,
-		a.AvgVolume,
-		a.EMA26,
-		a.MACDLine,
-		a.MACDSignalLine)
 }
