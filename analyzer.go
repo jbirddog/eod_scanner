@@ -26,6 +26,18 @@ func (s *SMA) Value() float64 {
 	return s.Cumulative / float64(s.Periods)
 }
 
+type EMA struct {
+	Periods int
+	Value   float64
+	_sma    SMA
+}
+
+func (e *EMA) Init(periods int) {
+	e.Periods = periods
+	e._sma.Periods = periods
+}
+
+// TODO: Move the macd bools to flags
 type AnalyzedData struct {
 	Symbol         string
 	DataPoints     int
@@ -35,12 +47,13 @@ type AnalyzedData struct {
 	MACDLine       float64
 	MACDWasNeg     bool
 	MACDIsPos      bool
-	EMA12          float64
+	EMA12          EMA
 	EMA26          float64
-	SMA20_X        SMA
-	SMA20          float64
-	LastClose      float64
+	SMA20          SMA
 	EODData        []*EODData
+
+	EMA12_DEPRECATED float64
+	SMA20_DEPRECATED float64
 }
 
 type AnalyzedDataBySymbol = map[string]*AnalyzedData
@@ -49,6 +62,7 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 	analyzed := make(AnalyzedDataBySymbol)
 	days := len(eodData)
 
+	// TODO: move init in !found to New function or similar, inline the closure
 	analyzedDataForSymbol := func(symbol string) *AnalyzedData {
 		data, found := analyzed[symbol]
 		if !found {
@@ -56,7 +70,8 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 				Symbol:  symbol,
 				EODData: make([]*EODData, days),
 			}
-			data.SMA20_X.Periods = 20
+			data.EMA12.Init(12)
+			data.SMA20.Periods = 20
 			analyzed[symbol] = data
 		}
 		return data
@@ -81,7 +96,6 @@ func addEODData(data *AnalyzedData, record *EODData, day int, days int) {
 
 	data.EODData[day] = record
 	data.DataPoints += 1
-	data.LastClose = record.Close
 }
 
 func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day int, days int) {
@@ -102,18 +116,18 @@ func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day in
 	}
 
 	if daysRemaining < 20 {
-		data.SMA20 = runningAvg(data.SMA20, dpF, record.Close)
+		data.SMA20_DEPRECATED = runningAvg(data.SMA20_DEPRECATED, dpF, record.Close)
 	} else {
-		data.SMA20 = record.Close
+		data.SMA20_DEPRECATED = record.Close
 	}
 
-	data.SMA20_X.Add(record, data.EODData, day)
+	data.SMA20.Add(record, data.EODData, day)
 
 	if daysRemaining < 12 {
-		data.EMA12 = ema(12, data.EMA12, record.Close)
-		data.MACDLine = data.EMA12 - data.EMA26
+		data.EMA12_DEPRECATED = ema(12, data.EMA12_DEPRECATED, record.Close)
+		data.MACDLine = data.EMA12_DEPRECATED - data.EMA26
 	} else {
-		data.EMA12 = data.SMA20
+		data.EMA12_DEPRECATED = data.SMA20_DEPRECATED
 	}
 
 	if daysRemaining < 9 {

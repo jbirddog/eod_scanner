@@ -55,13 +55,16 @@ func main() {
 		return symbols[i].Symbol < symbols[j].Symbol
 	})
 
+	fmt.Printf("Found %d symbols\n\n", len(symbols))
+
 	for _, v := range symbols {
-		fmt.Printf("%s: (%f %f) %d (%f %f %f)\n",
+		fmt.Printf("%s: %.2f %d (%.2f) (%.2f | %.2f -- %.2f %.2f)\n",
 			v.Symbol,
-			v.SMA20,
-			v.SMA20_X.Value(),
+			v.AvgClose,
 			v.AvgVolume,
-			v.EMA26,
+			v.SMA20.Value(),
+			0.0,
+			v.EMA12_DEPRECATED,
 			v.MACDLine,
 			v.MACDSignalLine)
 	}
