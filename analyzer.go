@@ -6,9 +6,24 @@ import (
 
 type SMA struct {
 	Periods    int
-	DataPoints int
 	Cumulative float64
-	Value      float64
+}
+
+func (s *SMA) Add(new *EODData, previous []*EODData, period int) {
+	s.Cumulative += new.Close
+
+	if period < s.Periods {
+		return
+	}
+
+	if lookBack := previous[period-s.Periods]; lookBack != nil {
+		s.Cumulative -= lookBack.Close
+
+	}
+}
+
+func (s *SMA) Value() float64 {
+	return s.Cumulative / float64(s.Periods)
 }
 
 type AnalyzedData struct {
@@ -92,16 +107,7 @@ func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day in
 		data.SMA20 = record.Close
 	}
 
-	if day < 20 {
-		data.SMA20_X.Cumulative += record.Close
-	} else {
-		lookBack := data.EODData[day-20]
-		if lookBack != nil {
-			data.SMA20_X.Cumulative -= lookBack.Close
-			data.SMA20_X.Cumulative += record.Close
-			data.SMA20_X.Value = data.SMA20_X.Cumulative / float64(data.SMA20_X.Periods)
-		}
-	}
+	data.SMA20_X.Add(record, data.EODData, day)
 
 	if daysRemaining < 12 {
 		data.EMA12 = ema(12, data.EMA12, record.Close)

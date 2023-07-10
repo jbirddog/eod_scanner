@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 )
 
 const marketDayCount = 30
@@ -15,7 +16,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	dates := PreviousMarketDays(Day(2023, 07, 06), marketDayCount)
+	dates := PreviousMarketDays(Day(2023, 7, 9), marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
@@ -35,8 +36,9 @@ func main() {
 	}
 
 	analyzedDataBySymbol := Analyze(eodData)
+	symbols := make([]*AnalyzedData, 0, len(analyzedDataBySymbol))
 
-	for k, v := range analyzedDataBySymbol {
+	for _, v := range analyzedDataBySymbol {
 		if v.DataPoints != marketDayCount || v.AvgVolume < 500000 || v.AvgClose < 5.0 {
 			continue
 		}
@@ -45,10 +47,19 @@ func main() {
 			continue
 		}
 
+		symbols = append(symbols, v)
+	}
+
+	sort.Slice(symbols, func(i, j int) bool {
+		// TODO: better sorting besides just by name
+		return symbols[i].Symbol < symbols[j].Symbol
+	})
+
+	for _, v := range symbols {
 		fmt.Printf("%s: (%f %f) %d (%f %f %f)\n",
-			k,
+			v.Symbol,
 			v.SMA20,
-			v.SMA20_X.Value,
+			v.SMA20_X.Value(),
 			v.AvgVolume,
 			v.EMA26,
 			v.MACDLine,
