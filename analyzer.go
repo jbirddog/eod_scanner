@@ -4,6 +4,8 @@ import (
 	"sort"
 )
 
+// TODO: Move SMA/EMA to indicators.go, add tests
+
 type SMA struct {
 	Periods    int
 	Cumulative float64
@@ -35,6 +37,20 @@ type EMA struct {
 func (e *EMA) Init(periods int) {
 	e.Periods = periods
 	e._sma.Periods = periods
+}
+
+func (e *EMA) Add(new *EODData, previous []*EODData, period int) {
+	if period < e.Periods {
+		e._sma.Add(new, previous, period)
+
+		if period == e.Periods-1 {
+			e.Value = e._sma.Value()
+		}
+		return
+	}
+
+	weight := 2.0 / (1.0 + float64(e.Periods))
+	e.Value = (new.Close * weight) + (e.Value * (1.0 - weight))
 }
 
 // TODO: Move the macd bools to flags
@@ -121,6 +137,7 @@ func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day in
 		data.SMA20_DEPRECATED = record.Close
 	}
 
+	data.EMA12.Add(record, data.EODData, day)
 	data.SMA20.Add(record, data.EODData, day)
 
 	if daysRemaining < 12 {
