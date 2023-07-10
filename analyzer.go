@@ -4,56 +4,8 @@ import (
 	"sort"
 )
 
-// TODO: Move SMA/EMA to indicators.go, add tests
-
-type SMA struct {
-	Periods    int
-	Cumulative float64
-}
-
-func (s *SMA) Add(new *EODData, previous []*EODData, period int) {
-	s.Cumulative += new.Close
-
-	if period < s.Periods {
-		return
-	}
-
-	if lookBack := previous[period-s.Periods]; lookBack != nil {
-		s.Cumulative -= lookBack.Close
-
-	}
-}
-
-func (s *SMA) Value() float64 {
-	return s.Cumulative / float64(s.Periods)
-}
-
-type EMA struct {
-	Periods int
-	Value   float64
-	_sma    SMA
-}
-
-func (e *EMA) Init(periods int) {
-	e.Periods = periods
-	e._sma.Periods = periods
-}
-
-func (e *EMA) Add(new *EODData, previous []*EODData, period int) {
-	if period < e.Periods {
-		e._sma.Add(new, previous, period)
-
-		if period == e.Periods-1 {
-			e.Value = e._sma.Value()
-		}
-		return
-	}
-
-	weight := 2.0 / (1.0 + float64(e.Periods))
-	e.Value = (new.Close * weight) + (e.Value * (1.0 - weight))
-}
-
 // TODO: Move the macd bools to flags
+// TODO: Extract MACD like SMA/EMA
 type AnalyzedData struct {
 	Symbol         string
 	DataPoints     int
@@ -64,11 +16,12 @@ type AnalyzedData struct {
 	MACDWasNeg     bool
 	MACDIsPos      bool
 	EMA12          EMA
-	EMA26          float64
+	EMA26          EMA
 	SMA20          SMA
 	EODData        []*EODData
 
 	EMA12_DEPRECATED float64
+	EMA26_DEPRECATED float64
 	SMA20_DEPRECATED float64
 }
 
@@ -87,6 +40,7 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 				EODData: make([]*EODData, days),
 			}
 			data.EMA12.Init(12)
+			data.EMA26.Init(26)
 			data.SMA20.Periods = 20
 			analyzed[symbol] = data
 		}
@@ -119,16 +73,25 @@ func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day in
 	dpF := float64(dp)
 	data.AvgVolume = runningAvg(data.AvgVolume, dp, record.Volume)
 	data.AvgClose = runningAvg(data.AvgClose, dpF, record.Close)
-	daysRemaining := days - day
 
-	// these values are imperfect but close enough for what we are trying to do.
+	// these are the new values that appear much more correct. at times they are pennies off
+	// once indicators are factored out into their own file and tested I'm sure they will
+	// tighten again
+	data.EMA12.Add(record, data.EODData, day)
+	data.EMA26.Add(record, data.EODData, day)
+	data.SMA20.Add(record, data.EODData, day)
+
+	// OLD: these values are imperfect but close enough for what we are trying to do.
 	// we arn't bot trading here, just trying to trim down from 10Ks of symbols to many
 	// dozen of symbols to manually look at charts
+	// - truth they are a little further off than I thought, being corrected above.
+
+	daysRemaining := days - day
 
 	if daysRemaining < 26 {
-		data.EMA26 = ema(26, data.EMA26, record.Close)
+		data.EMA26_DEPRECATED = ema_deprecated(26, data.EMA26_DEPRECATED, record.Close)
 	} else {
-		data.EMA26 = data.AvgClose
+		data.EMA26_DEPRECATED = data.AvgClose
 	}
 
 	if daysRemaining < 20 {
@@ -137,18 +100,15 @@ func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day in
 		data.SMA20_DEPRECATED = record.Close
 	}
 
-	data.EMA12.Add(record, data.EODData, day)
-	data.SMA20.Add(record, data.EODData, day)
-
 	if daysRemaining < 12 {
-		data.EMA12_DEPRECATED = ema(12, data.EMA12_DEPRECATED, record.Close)
-		data.MACDLine = data.EMA12_DEPRECATED - data.EMA26
+		data.EMA12_DEPRECATED = ema_deprecated(12, data.EMA12_DEPRECATED, record.Close)
+		data.MACDLine = data.EMA12_DEPRECATED - data.EMA26_DEPRECATED
 	} else {
 		data.EMA12_DEPRECATED = data.SMA20_DEPRECATED
 	}
 
 	if daysRemaining < 9 {
-		data.MACDSignalLine = ema(9, data.MACDSignalLine, data.MACDLine)
+		data.MACDSignalLine = ema_deprecated(9, data.MACDSignalLine, data.MACDLine)
 		isNeg := data.MACDLine < 0 || data.MACDSignalLine < 0
 		if isNeg {
 			data.MACDWasNeg = true
@@ -163,7 +123,7 @@ func runningAvg[T int | float64](current T, n T, new T) T {
 	return (current*n + new) / (n + 1)
 }
 
-func ema(days int, current float64, new float64) float64 {
+func ema_deprecated(days int, current float64, new float64) float64 {
 	weight := 2.0 / (1.0 + float64(days))
 	return (new * weight) + (current * (1.0 - weight))
 }
