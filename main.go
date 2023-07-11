@@ -16,7 +16,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	dates := PreviousMarketDays(Day(2023, 7, 10), marketDayCount)
+	dates := PreviousMarketDays(Day(2023, 7, 11), marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
@@ -58,12 +58,13 @@ func main() {
 	fmt.Printf("Found %d symbols\n\n", len(symbols))
 
 	for _, v := range symbols {
-		fmt.Printf("%s %d (%.2f) (%.2f -- %.2f %.2f)\n",
+		fmt.Printf("%s %d (%.2f) (%.2f %.2f -- %.2f %.2f)\n",
 			v.Symbol,
 			v.AvgVolume,
 			v.SMA20.Value(),
-			v.EMA12.Value,
-			v.MACDLine,
-			v.MACDSignalLine)
+			v.MACD.Line,
+			v.MACD.Signal.Value,
+			v.MACDLine_DEPRECATED,
+			v.MACDSignalLine_DEPRECATED)
 	}
 }

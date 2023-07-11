@@ -5,24 +5,22 @@ import (
 )
 
 // TODO: Move the macd bools to flags
-// TODO: Extract MACD like SMA/EMA
 type AnalyzedData struct {
-	Symbol         string
-	DataPoints     int
-	AvgVolume      int
-	AvgClose       float64
-	MACDSignalLine float64
-	MACDLine       float64
-	MACDWasNeg     bool
-	MACDIsPos      bool
-	EMA12          EMA
-	EMA26          EMA
-	SMA20          SMA
-	EODData        []*EODData
+	Symbol     string
+	DataPoints int
+	AvgVolume  int
+	AvgClose   float64
+	MACDWasNeg bool
+	MACDIsPos  bool
+	MACD       MACD
+	SMA20      SMA
+	EODData    []*EODData
 
-	EMA12_DEPRECATED float64
-	EMA26_DEPRECATED float64
-	SMA20_DEPRECATED float64
+	EMA12_DEPRECATED          float64
+	EMA26_DEPRECATED          float64
+	SMA20_DEPRECATED          float64
+	MACDSignalLine_DEPRECATED float64
+	MACDLine_DEPRECATED       float64
 }
 
 type AnalyzedDataBySymbol = map[string]*AnalyzedData
@@ -39,8 +37,7 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 				Symbol:  symbol,
 				EODData: make([]*EODData, days),
 			}
-			data.EMA12.Init(12)
-			data.EMA26.Init(26)
+			data.MACD.Init()
 			data.SMA20.Periods = 20
 			analyzed[symbol] = data
 		}
@@ -77,8 +74,7 @@ func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day in
 	// these are the new values that appear much more correct. at times they are pennies off
 	// once indicators are factored out into their own file and tested I'm sure they will
 	// tighten again
-	data.EMA12.Add(record, data.EODData, day)
-	data.EMA26.Add(record, data.EODData, day)
+	data.MACD.Add(record, data.EODData, day)
 	data.SMA20.Add(record, data.EODData, day)
 
 	// OLD: these values are imperfect but close enough for what we are trying to do.
@@ -102,20 +98,20 @@ func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day in
 
 	if daysRemaining < 12 {
 		data.EMA12_DEPRECATED = ema_deprecated(12, data.EMA12_DEPRECATED, record.Close)
-		data.MACDLine = data.EMA12_DEPRECATED - data.EMA26_DEPRECATED
+		data.MACDLine_DEPRECATED = data.EMA12_DEPRECATED - data.EMA26_DEPRECATED
 	} else {
 		data.EMA12_DEPRECATED = data.SMA20_DEPRECATED
 	}
 
 	if daysRemaining < 9 {
-		data.MACDSignalLine = ema_deprecated(9, data.MACDSignalLine, data.MACDLine)
-		isNeg := data.MACDLine < 0 || data.MACDSignalLine < 0
+		data.MACDSignalLine_DEPRECATED = ema_deprecated(9, data.MACDSignalLine_DEPRECATED, data.MACDLine_DEPRECATED)
+		isNeg := data.MACDLine_DEPRECATED < 0 || data.MACDSignalLine_DEPRECATED < 0
 		if isNeg {
 			data.MACDWasNeg = true
 		}
 		data.MACDIsPos = !isNeg
 	} else {
-		data.MACDSignalLine = data.MACDLine
+		data.MACDSignalLine_DEPRECATED = data.MACDLine_DEPRECATED
 	}
 }
 

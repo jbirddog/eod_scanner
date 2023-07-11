@@ -56,7 +56,11 @@ func (e *EMA) Add(new *EODData, previous []*EODData, period int) {
 		return
 	}
 
-	e.Value = (new.Close * e.Weight) + (e.Value * (1.0 - e.Weight))
+	e.AddPoint(new.Close)
+}
+
+func (e *EMA) AddPoint(new float64) {
+	e.Value = (new * e.Weight) + (e.Value * (1.0 - e.Weight))
 }
 
 //
@@ -80,8 +84,11 @@ func (m *MACD) Add(new *EODData, previous []*EODData, period int) {
 	m._ema12.Add(new, previous, period)
 	m._ema26.Add(new, previous, period)
 	m.Line = m._ema12.Value - m._ema26.Value
-	
+
 	if period < m._ema26.Periods {
+		m.Signal.Value = m.Line
 		return
 	}
+
+	m.Signal.AddPoint(m.Line)
 }
