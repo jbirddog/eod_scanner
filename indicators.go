@@ -67,6 +67,11 @@ func (e *EMA) AddPoint(new float64) {
 // MACD
 //
 
+const (
+	MACDCross_Neg = 1 << iota
+	MACDCross_Pos
+)
+
 type MACD struct {
 	Line   float64
 	Signal EMA

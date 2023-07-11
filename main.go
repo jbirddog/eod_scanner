@@ -39,11 +39,25 @@ func main() {
 	symbols := make([]*AnalyzedData, 0, len(analyzedDataBySymbol))
 
 	for _, v := range analyzedDataBySymbol {
-		if v.DataPoints != marketDayCount || v.AvgVolume < 500000 || v.AvgClose < 5.0 {
+		// TODO: break out into signals
+		if v.DataPoints != marketDayCount {
 			continue
 		}
 
+		if v.AvgVolume < 500000 || v.AvgClose < 5.0 {
+			continue
+		}
+
+		// TODO: buy vs sell signals
 		if v.MACD.Line < v.MACD.Signal.Value {
+			continue
+		}
+
+		if v.LastClose() < v.SMA20.Value() {
+			continue
+		}
+
+		if v.LastVolume() < v.AvgVolume {
 			continue
 		}
 
@@ -55,8 +69,6 @@ func main() {
 		return symbols[i].Symbol < symbols[j].Symbol
 	})
 
-	fmt.Printf("Found %d symbols\n\n", len(symbols))
-
 	for _, v := range symbols {
 		fmt.Printf("%s %d (%.2f) (%.2f %.2f)\n",
 			v.Symbol,
@@ -65,4 +77,6 @@ func main() {
 			v.MACD.Line,
 			v.MACD.Signal.Value)
 	}
+
+	fmt.Printf("Found %d symbols\n\n", len(symbols))
 }

@@ -20,6 +20,14 @@ type AnalyzedData struct {
 	MACDLine_DEPRECATED       float64
 }
 
+func (a *AnalyzedData) LastClose() float64 {
+	return a.EODData[len(a.EODData)-1].Close
+}
+
+func (a *AnalyzedData) LastVolume() int {
+	return a.EODData[len(a.EODData)-1].Volume
+}
+
 type AnalyzedDataBySymbol = map[string]*AnalyzedData
 
 func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
