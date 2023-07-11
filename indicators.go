@@ -1,5 +1,7 @@
 package main
 
+// TODO: need to add some tests for these indicators
+
 //
 // SMA
 //
@@ -32,7 +34,7 @@ func (s *SMA) Value() float64 {
 
 type EMA struct {
 	Periods int
-	Weight float64
+	Weight  float64
 	Value   float64
 	_sma    SMA
 }
@@ -55,4 +57,31 @@ func (e *EMA) Add(new *EODData, previous []*EODData, period int) {
 	}
 
 	e.Value = (new.Close * e.Weight) + (e.Value * (1.0 - e.Weight))
+}
+
+//
+// MACD
+//
+
+type MACD struct {
+	Line   float64
+	Signal EMA
+	_ema12 EMA
+	_ema26 EMA
+}
+
+func (m *MACD) Init() {
+	m._ema12.Init(12)
+	m._ema26.Init(26)
+	m.Signal.Init(9)
+}
+
+func (m *MACD) Add(new *EODData, previous []*EODData, period int) {
+	m._ema12.Add(new, previous, period)
+	m._ema26.Add(new, previous, period)
+	m.Line = m._ema12.Value - m._ema26.Value
+	
+	if period < m._ema26.Periods {
+		return
+	}
 }

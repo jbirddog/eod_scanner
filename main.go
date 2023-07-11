@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 
-const marketDayCount = 30
+const marketDayCount = 35
 
 func main() {
 	dataDir := os.Getenv("EOD_DATA_DIR")
@@ -16,7 +16,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	dates := PreviousMarketDays(Day(2023, 7, 9), marketDayCount)
+	dates := PreviousMarketDays(Day(2023, 7, 10), marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
