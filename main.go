@@ -43,7 +43,7 @@ func main() {
 			continue
 		}
 
-		if !v.MACDWasNeg || !v.MACDIsPos {
+		if v.MACD.Line < v.MACD.Signal.Value {
 			continue
 		}
 
@@ -58,13 +58,11 @@ func main() {
 	fmt.Printf("Found %d symbols\n\n", len(symbols))
 
 	for _, v := range symbols {
-		fmt.Printf("%s %d (%.2f) (%.2f %.2f -- %.2f %.2f)\n",
+		fmt.Printf("%s %d (%.2f) (%.2f %.2f)\n",
 			v.Symbol,
 			v.AvgVolume,
 			v.SMA20.Value(),
 			v.MACD.Line,
-			v.MACD.Signal.Value,
-			v.MACDLine_DEPRECATED,
-			v.MACDSignalLine_DEPRECATED)
+			v.MACD.Signal.Value)
 	}
 }
