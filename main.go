@@ -65,10 +65,10 @@ func main() {
 	}
 
 	sort.Slice(symbols, func(i, j int) bool {
-		// TODO: better sorting
+		// TODO: define the real sort criteria
 		a := symbols[i].MACD.Trend + symbols[i].MACD.Gap()
 		b := symbols[j].MACD.Trend + symbols[j].MACD.Gap()
-		
+
 		return a < b
 	})
 

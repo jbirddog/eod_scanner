@@ -76,7 +76,7 @@ type MACD struct {
 	Line   float64
 	Signal EMA
 	Flags  int
-	Trend float64
+	Trend  float64
 	_ema12 EMA
 	_ema26 EMA
 }
@@ -99,11 +99,10 @@ func (m *MACD) Add(new *EODData, previous []*EODData, period int) {
 		return
 	}
 
-	m.Trend += m.Line - prev
-
 	m.Signal.AddPoint(m.Line)
+	m.Trend += m.Line - prev
 }
 
 func (m *MACD) Gap() float64 {
-return m.Line - m.Signal.Value
+	return m.Line - m.Signal.Value
 }
