@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 
-const marketDayCount = 35
+const marketDayCount = 36
 
 func main() {
 	dataDir := os.Getenv("EOD_DATA_DIR")
@@ -16,7 +16,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	dates := PreviousMarketDays(Day(2023, 7, 11), marketDayCount)
+	dates := PreviousMarketDays(Day(2023, 7, 12), marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
@@ -49,7 +49,7 @@ func main() {
 		}
 
 		// TODO: buy vs sell signals
-		if v.MACD.Line < v.MACD.Signal.Value {
+		if v.MACD.Gap() < 0 || v.MACD.Trend < 0 {
 			continue
 		}
 
@@ -65,17 +65,21 @@ func main() {
 	}
 
 	sort.Slice(symbols, func(i, j int) bool {
-		// TODO: better sorting besides just by name
-		return symbols[i].Symbol < symbols[j].Symbol
+		// TODO: better sorting
+		a := symbols[i].MACD.Trend + symbols[i].MACD.Gap()
+		b := symbols[j].MACD.Trend + symbols[j].MACD.Gap()
+		
+		return a < b
 	})
 
 	for _, v := range symbols {
-		fmt.Printf("%s %d (%.2f) (%.2f %.2f)\n",
+		fmt.Printf("%s %d (%.2f) (%.2f %.2f) %.2f\n",
 			v.Symbol,
 			v.AvgVolume,
 			v.SMA20.Value(),
 			v.MACD.Line,
-			v.MACD.Signal.Value)
+			v.MACD.Signal.Value,
+			v.MACD.Trend)
 	}
 
 	fmt.Printf("Found %d symbols\n\n", len(symbols))
