@@ -45,7 +45,7 @@ func (e *EMA) Init(periods int) {
 	e._sma.Periods = periods
 }
 
-func (e *EMA) Add(new *EODData, previous []*EODData, period int) {
+func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
 	if period < e.Periods {
 		e._sma.Add(new, previous, period)
 
@@ -87,9 +87,9 @@ func (m *MACD) Init() {
 	m.Signal.Init(9)
 }
 
-func (m *MACD) Add(new *EODData, previous []*EODData, period int) {
-	m._ema12.Add(new, previous, period)
-	m._ema26.Add(new, previous, period)
+func (m *MACD) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
+	m._ema12.Add(new, previous, period, totalPeriods)
+	m._ema26.Add(new, previous, period, totalPeriods)
 
 	prev := m.Line
 	m.Line = m._ema12.Value - m._ema26.Value

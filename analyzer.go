@@ -76,10 +76,7 @@ func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day in
 	data.AvgVolume = runningAvg(data.AvgVolume, dp, record.Volume)
 	data.AvgClose = runningAvg(data.AvgClose, dpF, record.Close)
 
-	// these are the new values that appear much more correct. at times they are pennies off
-	// once indicators are factored out into their own file and tested I'm sure they will
-	// tighten again
-	data.MACD.Add(record, data.EODData, day)
+	data.MACD.Add(record, data.EODData, day, days)
 	data.SMA20.Add(record, data.EODData, day)
 }
 
