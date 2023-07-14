@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 
-const marketDayCount = 38
+const marketDayCount = 39
 const riskPerTrade = 1000.0
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	dates := PreviousMarketDays(Day(2023, 7, 13), marketDayCount)
+	dates := PreviousMarketDays(Day(2023, 7, 14), marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
@@ -76,12 +76,17 @@ func main() {
 	for _, v := range symbols {
 		p := PositionFromAnalyzedData(v, riskPerTrade)
 
-		fmt.Printf("%s %d (%.2f) (%.2f %.2f) %.2f | %d @ %.2f ~ %.2f > %.2f\n",
+		fmt.Printf("%s %d (%.2f) (%.2f %d %.2f %d -- %.2f %.2f %d) %.2f | %d @ %.2f ~ %.2f > %.2f\n",
 			v.Symbol,
 			v.AvgVolume,
 			v.SMA20.Value(),
+			v.MACD._ema12.Value,
+			v.MACD._ema12.DP,
+			v.MACD._ema26.Value,
+			v.MACD._ema26.DP,
 			v.MACD.Line,
 			v.MACD.Signal.Value,
+			v.MACD.Signal.DP,
 			v.MACD.Trend,
 			p.Shares,
 			p.Entry,

@@ -36,6 +36,7 @@ type EMA struct {
 	Periods int
 	Weight  float64
 	Value   float64
+	DP      int
 	_sma    SMA
 }
 
@@ -46,13 +47,10 @@ func (e *EMA) Init(periods int) {
 }
 
 func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
-	if period < e.Periods {
+	daysLeft := totalPeriods - period
+	if daysLeft > e.Periods {
 		e._sma.Add(new, previous, period)
-
-		if period == e.Periods-1 {
-			e.Value = e._sma.Value()
-		}
-
+		e.Value = e._sma.Value()
 		return
 	}
 
@@ -61,6 +59,7 @@ func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 
 func (e *EMA) AddPoint(new float64) {
 	e.Value = (new * e.Weight) + (e.Value * (1.0 - e.Weight))
+	e.DP += 1
 }
 
 //
@@ -91,15 +90,17 @@ func (m *MACD) Add(new *EODData, previous []*EODData, period int, totalPeriods i
 	m._ema12.Add(new, previous, period, totalPeriods)
 	m._ema26.Add(new, previous, period, totalPeriods)
 
+	daysLeft := totalPeriods - period
 	prev := m.Line
 	m.Line = m._ema12.Value - m._ema26.Value
 
-	if period < m._ema26.Periods {
+	if daysLeft > m.Signal.Periods {
 		m.Signal.Value = m.Line
 		return
 	}
 
 	m.Signal.AddPoint(m.Line)
+
 	m.Trend += m.Line - prev
 }
 
