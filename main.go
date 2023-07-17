@@ -55,7 +55,7 @@ func main() {
 			continue
 		}
 
-		if v.LastClose() < v.SMA20.Value() {
+		if v.LastClose() < v.SMA20.Value {
 			continue
 		}
 
@@ -80,7 +80,7 @@ func main() {
 		fmt.Printf("%s %d (%.2f) (%.2f %d %.2f %d -- %.2f %.2f %d) %.2f | %d @ %.2f ~ %.2f > %.2f\n",
 			v.Symbol,
 			v.AvgVolume,
-			v.SMA20.Value(),
+			v.SMA20.Value,
 			v.MACD._ema12.Value,
 			v.MACD._ema12.DP,
 			v.MACD._ema26.Value,

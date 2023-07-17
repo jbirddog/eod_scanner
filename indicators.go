@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 // TODO: need to add some tests for these indicators
 
 //
@@ -11,22 +9,22 @@ import "fmt"
 type SMA struct {
 	Periods    int
 	Cumulative float64
+	Value      float64
 }
 
 func (s *SMA) Add(new *EODData, previous []*EODData, period int) {
 	s.Cumulative += new.Close
 
 	if period < s.Periods {
+		s.Value = s.Cumulative / float64(period+1)
 		return
 	}
 
 	if lookBack := previous[period-s.Periods]; lookBack != nil {
 		s.Cumulative -= lookBack.Close
 	}
-}
 
-func (s *SMA) Value() float64 {
-	return s.Cumulative / float64(s.Periods)
+	s.Value = s.Cumulative / float64(s.Periods)
 }
 
 //
@@ -48,13 +46,10 @@ func (e *EMA) Init(periods int) {
 }
 
 func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
-if new.Symbol == "MSTR" {
-fmt.Printf("t: %d, p: %d, l: %d\n", totalPeriods, period, totalPeriods-period)
-}
 	daysLeft := totalPeriods - period
 	if daysLeft > e.Periods {
 		e._sma.Add(new, previous, period)
-		e.Value = e._sma.Value()
+		e.Value = e._sma.Value
 		return
 	}
 

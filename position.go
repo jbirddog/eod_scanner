@@ -15,7 +15,7 @@ type Position struct {
 
 func PositionFromAnalyzedData(data *AnalyzedData, risk float64) *Position {
 	entry := data.LastClose()
-	stopLoss := data.SMA20.Value()
+	stopLoss := data.SMA20.Value
 	// TODO: revist when adding support for shorts
 	shares := int(risk / (entry - stopLoss))
 	capitol := float64(shares) * entry
