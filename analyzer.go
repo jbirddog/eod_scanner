@@ -12,12 +12,6 @@ type AnalyzedData struct {
 	MACD       MACD
 	SMA20      SMA
 	EODData    []*EODData
-
-	EMA12_DEPRECATED          float64
-	EMA26_DEPRECATED          float64
-	SMA20_DEPRECATED          float64
-	MACDSignalLine_DEPRECATED float64
-	MACDLine_DEPRECATED       float64
 }
 
 func (a *AnalyzedData) LastClose() float64 {

@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // TODO: need to add some tests for these indicators
 
 //
@@ -20,7 +22,6 @@ func (s *SMA) Add(new *EODData, previous []*EODData, period int) {
 
 	if lookBack := previous[period-s.Periods]; lookBack != nil {
 		s.Cumulative -= lookBack.Close
-
 	}
 }
 
@@ -47,6 +48,9 @@ func (e *EMA) Init(periods int) {
 }
 
 func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
+if new.Symbol == "MSTR" {
+fmt.Printf("t: %d, p: %d, l: %d\n", totalPeriods, period, totalPeriods-period)
+}
 	daysLeft := totalPeriods - period
 	if daysLeft > e.Periods {
 		e._sma.Add(new, previous, period)
@@ -59,6 +63,8 @@ func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 
 func (e *EMA) AddPoint(new float64) {
 	e.Value = (new * e.Weight) + (e.Value * (1.0 - e.Weight))
+	//e.Value = (e.Weight * (new - e.Value)) + e.Value
+	//e.Value = (new - e.Value) * e.Weight + e.Value
 	e.DP += 1
 }
 

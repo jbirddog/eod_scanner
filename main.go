@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 
-const marketDayCount = 39
+const marketDayCount = 40
 const riskPerTrade = 1000.0
 
 func main() {
@@ -17,12 +17,13 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	dates := PreviousMarketDays(Day(2023, 7, 14), marketDayCount)
+	dates := PreviousMarketDays(Day(2023, 7, 16), marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
 
-	for i, date := range dates {
+	for i := len(dates) - 1; i >= 0; i-- {
+		date := dates[i]
 		rawData, err := LoadEODFile(dataDir, exchange, date)
 		if err != nil {
 			log.Fatal(err)
