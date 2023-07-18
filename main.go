@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 
-const marketDayCount = 40
+const marketDayCount = 42
 const riskPerTrade = 1000.0
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	dates := PreviousMarketDays(Day(2023, 7, 16), marketDayCount)
+	dates := PreviousMarketDays(Day(2023, 7, 18), marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
@@ -41,7 +41,6 @@ func main() {
 	symbols := make([]*AnalyzedData, 0, len(analyzedDataBySymbol))
 
 	for _, v := range analyzedDataBySymbol {
-		// TODO: break out into signals
 		if v.DataPoints != marketDayCount {
 			continue
 		}
@@ -50,8 +49,8 @@ func main() {
 			continue
 		}
 
-		// TODO: buy vs sell signals
-		if v.MACD.Gap() < 0 || v.MACD.Trend < 0 {
+		// TODO: break out into buy vs sell signals
+		if v.MACD.Signal.Value < v.MACD.Line {
 			continue
 		}
 
@@ -68,8 +67,8 @@ func main() {
 
 	sort.Slice(symbols, func(i, j int) bool {
 		// TODO: define the real sort criteria
-		a := symbols[i].MACD.Trend + symbols[i].MACD.Gap()
-		b := symbols[j].MACD.Trend + symbols[j].MACD.Gap()
+		a := symbols[i].LastVolume() - symbols[i].AvgVolume
+		b := symbols[j].LastVolume() - symbols[j].AvgVolume
 
 		return a < b
 	})
@@ -77,17 +76,14 @@ func main() {
 	for _, v := range symbols {
 		p := PositionFromAnalyzedData(v, riskPerTrade)
 
-		fmt.Printf("%s %d (%.2f) (%.2f %d %.2f %d -- %.2f %.2f %d) %.2f | %d @ %.2f ~ %.2f > %.2f\n",
+		fmt.Printf("%s %d (%.2f) (%.2f %.2f -- %.2f %.2f) %.2f | %d @ %.2f ~ %.2f > %.2f\n",
 			v.Symbol,
 			v.AvgVolume,
 			v.SMA20.Value,
 			v.MACD._ema12.Value,
-			v.MACD._ema12.DP,
 			v.MACD._ema26.Value,
-			v.MACD._ema26.DP,
 			v.MACD.Line,
 			v.MACD.Signal.Value,
-			v.MACD.Signal.DP,
 			v.MACD.Trend,
 			p.Shares,
 			p.Entry,

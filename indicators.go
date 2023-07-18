@@ -35,7 +35,6 @@ type EMA struct {
 	Periods int
 	Weight  float64
 	Value   float64
-	DP      int
 	_sma    SMA
 }
 
@@ -60,7 +59,6 @@ func (e *EMA) AddPoint(new float64) {
 	e.Value = (new * e.Weight) + (e.Value * (1.0 - e.Weight))
 	//e.Value = (e.Weight * (new - e.Value)) + e.Value
 	//e.Value = (new - e.Value) * e.Weight + e.Value
-	e.DP += 1
 }
 
 //
