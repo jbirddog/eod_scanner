@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 
-const marketDayCount = 42
+const marketDayCount = 52
 const riskPerTrade = 1000.0
 
 func main() {
@@ -50,7 +50,7 @@ func main() {
 		}
 
 		// TODO: break out into buy vs sell signals
-		if v.MACD.Signal.Value < v.MACD.Line {
+		if v.MACD.Gap() < 0 {
 			continue
 		}
 
@@ -67,8 +67,10 @@ func main() {
 
 	sort.Slice(symbols, func(i, j int) bool {
 		// TODO: define the real sort criteria
-		a := symbols[i].LastVolume() - symbols[i].AvgVolume
-		b := symbols[j].LastVolume() - symbols[j].AvgVolume
+		symbol_a := symbols[i]
+		symbol_b := symbols[j] 
+		a := float64(symbol_a.LastVolume() - symbol_a.AvgVolume) / symbol_a.MACD.Gap()
+		b := float64(symbol_b.LastVolume() - symbol_b.AvgVolume) / symbol_b.MACD.Gap()
 
 		return a < b
 	})

@@ -66,7 +66,8 @@ func (e *EMA) AddPoint(new float64) {
 //
 
 const (
-	MACDCross_Neg = 1 << iota
+	MACDStart_Pos = 1 << iota
+	MACDCross_Neg
 	MACDCross_Pos
 )
 
@@ -98,11 +99,26 @@ func (m *MACD) Add(new *EODData, previous []*EODData, period int, totalPeriods i
 		return
 	}
 
-	m.Signal.AddPoint(m.Line)
-
 	m.Trend += m.Line - prev
+	m.Signal.AddPoint(m.Line)
+	m.setFlags(daysLeft)
 }
 
 func (m *MACD) Gap() float64 {
 	return m.Line - m.Signal.Value
+}
+
+func (m *MACD) setFlags(daysLeft int) {
+	gapIsPos := m.Gap() > 0
+	wasPos := m.Flags&(MACDStart_Pos|MACDCross_Pos) > 0
+
+	if gapIsPos {
+		if daysLeft == m.Signal.Periods {
+			m.Flags |= MACDStart_Pos
+		} else if !wasPos {
+			m.Flags |= MACDCross_Pos
+		}
+	} else if wasPos {
+		m.Flags |= MACDCross_Neg
+	}
 }
