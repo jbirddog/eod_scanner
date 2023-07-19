@@ -17,7 +17,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	dates := PreviousMarketDays(Day(2023, 7, 18), marketDayCount)
+	dates := PreviousMarketDays(Day(2023, 7, 19), marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
@@ -68,9 +68,9 @@ func main() {
 	sort.Slice(symbols, func(i, j int) bool {
 		// TODO: define the real sort criteria
 		symbol_a := symbols[i]
-		symbol_b := symbols[j] 
-		a := float64(symbol_a.LastVolume() - symbol_a.AvgVolume) / symbol_a.MACD.Gap()
-		b := float64(symbol_b.LastVolume() - symbol_b.AvgVolume) / symbol_b.MACD.Gap()
+		symbol_b := symbols[j]
+		a := float64(symbol_a.LastVolume()-symbol_a.AvgVolume) / symbol_a.MACD.Gap()
+		b := float64(symbol_b.LastVolume()-symbol_b.AvgVolume) / symbol_b.MACD.Gap()
 
 		return a < b
 	})
