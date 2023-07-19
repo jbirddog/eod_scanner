@@ -18,6 +18,11 @@ func (a *AnalyzedData) LastClose() float64 {
 	return a.EODData[len(a.EODData)-1].Close
 }
 
+func (a *AnalyzedData) ClosedUp() bool {
+	data := a.EODData[len(a.EODData)-1]
+	return data.Close > data.Open
+}
+
 func (a *AnalyzedData) LastVolume() int {
 	return a.EODData[len(a.EODData)-1].Volume
 }

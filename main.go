@@ -49,6 +49,10 @@ func main() {
 			continue
 		}
 
+		if !v.ClosedUp() {
+			continue
+		}
+
 		// TODO: break out into buy vs sell signals
 		if v.MACD.Gap() < 0 {
 			continue
