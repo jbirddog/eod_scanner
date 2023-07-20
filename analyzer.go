@@ -27,6 +27,14 @@ func (a *AnalyzedData) LastVolume() int {
 	return a.EODData[len(a.EODData)-1].Volume
 }
 
+func (a *AnalyzedData) SortWeight() float64 {
+	macdWeight := a.MACD.Line * a.MACD.Gap()
+	volumeWeight := a.LastVolume() / a.AvgVolume
+	weight := macdWeight * float64(volumeWeight)
+
+	return weight
+}
+
 type AnalyzedDataBySymbol = map[string]*AnalyzedData
 
 func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {

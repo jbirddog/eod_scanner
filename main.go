@@ -8,7 +8,7 @@ import (
 )
 
 const marketDayCount = 52
-const riskPerTrade = 1000.0
+const riskPerTrade = 50000.0 * 0.005
 
 func main() {
 	dataDir := os.Getenv("EOD_DATA_DIR")
@@ -17,7 +17,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	dates := PreviousMarketDays(Day(2023, 7, 19), marketDayCount)
+	dates := PreviousMarketDays(Day(2023, 7, 20), marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
@@ -70,13 +70,7 @@ func main() {
 	}
 
 	sort.Slice(symbols, func(i, j int) bool {
-		// TODO: define the real sort criteria
-		symbol_a := symbols[i]
-		symbol_b := symbols[j]
-		a := float64(symbol_a.LastVolume()-symbol_a.AvgVolume) / symbol_a.MACD.Gap()
-		b := float64(symbol_b.LastVolume()-symbol_b.AvgVolume) / symbol_b.MACD.Gap()
-
-		return a < b
+		return symbols[i].SortWeight() > symbols[j].SortWeight()
 	})
 
 	for _, v := range symbols {
@@ -97,5 +91,5 @@ func main() {
 			p.StopLoss)
 	}
 
-	fmt.Printf("Found %d symbols\n\n", len(symbols))
+	fmt.Printf("Found %d symbols. %.2f risk per trade\n\n", len(symbols), riskPerTrade)
 }
