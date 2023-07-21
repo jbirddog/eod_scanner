@@ -44,7 +44,7 @@ func main() {
 			continue
 		}
 
-		if v.AvgVolume < 500000 || v.AvgClose < 5.0 {
+		if v.AvgVolume < 1000000 || v.AvgClose < 5.0 {
 			continue
 		}
 
