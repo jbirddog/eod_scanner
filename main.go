@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"sort"
 )
 
 const marketDayCount = 52
@@ -17,7 +15,8 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	dates := PreviousMarketDays(Day(2023, 7, 20), marketDayCount)
+	currentDay := Day(2023, 7, 21)
+	dates := PreviousMarketDays(currentDay, marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
@@ -49,11 +48,15 @@ func main() {
 			continue
 		}
 
-		if !v.ClosedUp() {
+		if v.LastVolume() < v.AvgVolume {
 			continue
 		}
 
 		// TODO: break out into buy vs sell signals
+		if !v.ClosedUp() {
+			continue
+		}
+
 		if v.MACD.Gap() < 0 {
 			continue
 		}
@@ -62,34 +65,8 @@ func main() {
 			continue
 		}
 
-		if v.LastVolume() < v.AvgVolume {
-			continue
-		}
-
 		symbols = append(symbols, v)
 	}
 
-	sort.Slice(symbols, func(i, j int) bool {
-		return symbols[i].SortWeight() > symbols[j].SortWeight()
-	})
-
-	for _, v := range symbols {
-		p := PositionFromAnalyzedData(v, riskPerTrade)
-
-		fmt.Printf("%s %d (%.2f) (%.2f %.2f -- %.2f %.2f) %.2f | %d @ %.2f ~ %.2f > %.2f\n",
-			v.Symbol,
-			v.AvgVolume,
-			v.SMA20.Value,
-			v.MACD._ema12.Value,
-			v.MACD._ema26.Value,
-			v.MACD.Line,
-			v.MACD.Signal.Value,
-			v.MACD.Trend,
-			p.Shares,
-			p.Entry,
-			p.Capitol,
-			p.StopLoss)
-	}
-
-	fmt.Printf("Found %d symbols. %.2f risk per trade\n\n", len(symbols), riskPerTrade)
+	PrintReport(symbols, currentDay)
 }
