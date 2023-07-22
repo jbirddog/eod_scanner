@@ -109,3 +109,49 @@ func (m *MACD) Add(new *EODData, previous []*EODData, period int, totalPeriods i
 func (m *MACD) Gap() float64 {
 	return m.Line - m.Signal.Value
 }
+
+//
+// RSI
+//
+
+type RSI struct {
+	Periods int
+	AvgGain float64
+	AvgLoss float64
+	Value   float64
+}
+
+func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
+	if period == 0 {
+		return
+	}
+
+	/*
+	lastClose := previous[period-1].Close
+	isGain := new.Close > lastClose
+	*/
+
+	/*
+	diff := new.Close - lastClose
+
+	if period <= r.Periods {
+		r.stepOne(period-1, diff)
+	} else {
+		r.stepTwo(diff)
+	}
+	*/
+}
+
+func (r *RSI) stepOne(period int, diff float64) {
+}
+
+func (r *RSI) stepTwo(diff float64) {
+}
+
+//
+// utils
+//
+
+func runningAvg[T int | float64](current T, n T, new T) T {
+	return (current*n + new) / (n + 1)
+}

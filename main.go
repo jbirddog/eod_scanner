@@ -15,7 +15,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	currentDay := Day(2023, 7, 21)
+	currentDay := Day(2023, 7, 22)
 	dates := PreviousMarketDays(currentDay, marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"

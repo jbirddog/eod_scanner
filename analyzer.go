@@ -86,7 +86,3 @@ func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day in
 	data.MACD.Add(record, data.EODData, day, days)
 	data.SMA20.Add(record, data.EODData, day)
 }
-
-func runningAvg[T int | float64](current T, n T, new T) T {
-	return (current*n + new) / (n + 1)
-}
