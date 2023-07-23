@@ -121,31 +121,52 @@ type RSI struct {
 	Value   float64
 }
 
+const RSI_SMOOTHER = 13.0
+
+func (r *RSI) Init() {
+	r.Periods = 14
+}
+
 func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
 	if period == 0 {
 		return
 	}
 
-	/*
-	lastClose := previous[period-1].Close
-	isGain := new.Close > lastClose
-	*/
+	period64 := float64(period)
+	prevClose := 0.0
 
-	/*
-	diff := new.Close - lastClose
-
-	if period <= r.Periods {
-		r.stepOne(period-1, diff)
-	} else {
-		r.stepTwo(diff)
+	if lookBack := previous[period-1]; lookBack != nil {
+		prevClose = lookBack.Close
 	}
-	*/
-}
 
-func (r *RSI) stepOne(period int, diff float64) {
-}
+	gain := 0.0
+	loss := 0.0
 
-func (r *RSI) stepTwo(diff float64) {
+	if prevClose < new.Close {
+		gain = percentage(new.Close, prevClose)
+	} else {
+		loss = percentage(prevClose, new.Close)
+	}
+
+	avgGain := runningAvg(r.AvgGain, gain, period64)
+	avgLoss := runningAvg(r.AvgLoss, loss, period64)
+
+	// TODO: refactor the value calculation
+	if period <= r.Periods {
+		if avgLoss > 0 {
+			r.Value = 100 - (100 / (1 + (avgGain / avgLoss)))
+		}
+	} else {
+		smoothedGain := (r.AvgGain * RSI_SMOOTHER) + avgGain
+		smoothedLoss := (r.AvgLoss * RSI_SMOOTHER) + avgLoss
+
+		if avgLoss > 0 {
+			r.Value = 100 - (100 / (1 + (smoothedGain / smoothedLoss)))
+		}
+	}
+
+	r.AvgGain = avgGain
+	r.AvgLoss = avgLoss
 }
 
 //
@@ -153,5 +174,11 @@ func (r *RSI) stepTwo(diff float64) {
 //
 
 func runningAvg[T int | float64](current T, n T, new T) T {
+	// assumes n is 0 based
+	n = n + 1
 	return (current*n + new) / (n + 1)
+}
+
+func percentage[T int | float64](a T, b T) T {
+	return (a - b) / b
 }
