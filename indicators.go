@@ -1,5 +1,9 @@
 package main
 
+import (
+"fmt"
+)
+
 // TODO: need to add some tests for these indicators
 
 //
@@ -132,7 +136,7 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 		return
 	}
 
-	period64 := float64(period)
+	period64 := float64(period-1)
 	prevClose := 0.0
 
 	if lookBack := previous[period-1]; lookBack != nil {
@@ -151,8 +155,13 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 	avgGain := runningAvg(r.AvgGain, gain, period64)
 	avgLoss := runningAvg(r.AvgLoss, loss, period64)
 
+	if new.Symbol == "MDLZ" {
+	fmt.Printf("%d %f %f %f %f %f %f\n", period, new.Close, prevClose, gain, loss, avgGain, avgLoss)
+	}
+
 	// TODO: refactor the value calculation
-	if period <= r.Periods {
+	if period > 0 {
+	//if period <= r.Periods {
 		if avgLoss > 0 {
 			r.Value = 100 - (100 / (1 + (avgGain / avgLoss)))
 		}
@@ -179,6 +188,6 @@ func runningAvg[T int | float64](current T, n T, new T) T {
 	return (current*n + new) / (n + 1)
 }
 
-func percentage[T int | float64](a T, b T) T {
-	return (a - b) / b
+func percentage(a float64, b float64) float64 {
+	return ((a - b) / a) * 100
 }
