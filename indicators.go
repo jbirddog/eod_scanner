@@ -136,7 +136,6 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 		return
 	}
 
-	period64 := float64(period - 1)
 	prevClose := 0.0
 
 	if lookBack := previous[period-1]; lookBack != nil {
@@ -152,22 +151,23 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 		loss = percentage(prevClose, new.Close)
 	}
 
-	avgGain := runningAvg(r.AvgGain, gain, period64)
-	avgLoss := runningAvg(r.AvgLoss, loss, period64)
-
-	if new.Symbol == "MDLZ" {
-		fmt.Printf("%d %f %f %f %f %f %f\n", period, new.Close, prevClose, gain, loss, avgGain, avgLoss)
+	if period == 1 {
+		r.AvgGain = gain
+		r.AvgLoss = loss
+		return
 	}
 
-	// TODO: refactor the value calculation
-	if period > 0 {
-		//if period <= r.Periods {
+	avgGain := runningAvg(r.AvgGain, period-1, gain)
+	avgLoss := runningAvg(r.AvgLoss, period-1, loss)
+
+	// TODO: refactor the value calculation once stabalized
+	if period <= r.Periods {
 		if avgLoss > 0 {
 			r.Value = 100 - (100 / (1 + (avgGain / avgLoss)))
 		}
 	} else {
-		smoothedGain := (r.AvgGain * RSI_SMOOTHER) + avgGain
-		smoothedLoss := (r.AvgLoss * RSI_SMOOTHER) + avgLoss
+		smoothedGain := (r.AvgGain * RSI_SMOOTHER) + gain
+		smoothedLoss := (r.AvgLoss * RSI_SMOOTHER) + loss
 
 		if avgLoss > 0 {
 			r.Value = 100 - (100 / (1 + (smoothedGain / smoothedLoss)))
@@ -176,14 +176,19 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 
 	r.AvgGain = avgGain
 	r.AvgLoss = avgLoss
+
+	if new.Symbol == "MDLZ" {
+		fmt.Printf("%d %f %f %f %f %f %f %f\n", period, new.Close, prevClose, gain, loss, avgGain, avgLoss, r.Value)
+	}
 }
 
 //
 // utils
 //
 
-func runningAvg(current float64, n float64, new float64) float64 {
-	return (current*n + new) / (n + 1)
+func runningAvg(current float64, n int, new float64) float64 {
+	n64 := float64(n)
+	return (current*n64 + new) / (n64 + 1)
 }
 
 func percentage(a float64, b float64) float64 {

@@ -68,5 +68,5 @@ func main() {
 		symbols = append(symbols, v)
 	}
 
-	PrintReport(symbols, currentDay)
+	//PrintReport(symbols, currentDay)
 }

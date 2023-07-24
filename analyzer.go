@@ -80,9 +80,8 @@ func addEODData(data *AnalyzedData, record *EODData, day int, days int) {
 }
 
 func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day int, days int) {
-	dp := float64(data.DataPoints)
-	data.AvgVolume = runningAvg(data.AvgVolume, dp, record.Volume)
-	data.AvgClose = runningAvg(data.AvgClose, dp, record.Close)
+	data.AvgVolume = runningAvg(data.AvgVolume, data.DataPoints, record.Volume)
+	data.AvgClose = runningAvg(data.AvgClose, data.DataPoints, record.Close)
 
 	data.MACD.Add(record, data.EODData, day, days)
 	data.SMA20.Add(record, data.EODData, day)
