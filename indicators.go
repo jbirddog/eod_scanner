@@ -1,9 +1,5 @@
 package main
 
-import (
-	"fmt"
-)
-
 // TODO: need to add some tests for these indicators
 
 //
@@ -163,13 +159,10 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 		return
 	}
 
+	// TODO: drive off r.Periods
 	r.AvgGain = ((1.0 / 14.0) * gain) + ((13.0 / 14.0) * r.AvgGain)
 	r.AvgLoss = ((1.0 / 14.0) * loss) + ((13.0 / 14.0) * r.AvgLoss)
 	r.Value = 100 - (100 / (1 + (r.AvgGain / r.AvgLoss)))
-
-	if new.Symbol == "PEP" {
-		fmt.Printf("%d %f %f %f %f %f %f %f\n", period, new.Close, prevClose, gain, loss, r.AvgGain, r.AvgLoss, r.Value)
-	}
 }
 
 //

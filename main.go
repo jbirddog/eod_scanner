@@ -61,6 +61,10 @@ func main() {
 			continue
 		}
 
+		if v.RSI.Value < 50.0 {
+		continue
+		}
+
 		if v.LastClose() < v.SMA20.Value {
 			continue
 		}
@@ -68,5 +72,5 @@ func main() {
 		symbols = append(symbols, v)
 	}
 
-	//PrintReport(symbols, currentDay)
+	PrintReport(symbols, currentDay)
 }
