@@ -169,7 +169,7 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 		smoothedGain := (r.AvgGain * RSI_SMOOTHER) + gain
 		smoothedLoss := (r.AvgLoss * RSI_SMOOTHER) + loss
 
-		if avgLoss > 0 {
+		if smoothedLoss > 0 {
 			r.Value = 100 - (100 / (1 + (smoothedGain / smoothedLoss)))
 		}
 	}
@@ -177,7 +177,7 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 	r.AvgGain = avgGain
 	r.AvgLoss = avgLoss
 
-	if new.Symbol == "MDLZ" {
+	if new.Symbol == "AMGN" {
 		fmt.Printf("%d %f %f %f %f %f %f %f\n", period, new.Close, prevClose, gain, loss, avgGain, avgLoss, r.Value)
 	}
 }
