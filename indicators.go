@@ -159,10 +159,17 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 		return
 	}
 
-	// TODO: drive off r.Periods
-	r.AvgGain = ((1.0 / 14.0) * gain) + ((13.0 / 14.0) * r.AvgGain)
-	r.AvgLoss = ((1.0 / 14.0) * loss) + ((13.0 / 14.0) * r.AvgLoss)
+	r.AvgGain = r.smooth(r.AvgGain, gain)
+	r.AvgLoss = r.smooth(r.AvgLoss, loss)
 	r.Value = 100 - (100 / (1 + (r.AvgGain / r.AvgLoss)))
+}
+
+func (r *RSI) smooth(current float64, new float64) float64 {
+	periods := float64(r.Periods)
+	a := 1.0 / periods
+	b := (periods - 1) / periods
+
+	return a*new + b*current
 }
 
 //

@@ -62,7 +62,7 @@ func main() {
 		}
 
 		if v.RSI.Value < 50.0 {
-		continue
+			continue
 		}
 
 		if v.LastClose() < v.SMA20.Value {
