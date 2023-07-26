@@ -15,12 +15,11 @@ func PrintReport(symbols []*AnalyzedData, currentDay time.Time) {
 		p := PositionFromAnalyzedData(v, riskPerTrade)
 
 		// TODO: string builder or buffered writer?
-		fmt.Printf("%s %d (%.2f) (%.2f %.2f -- %.2f %.2f) %.2f | %d @ %.2f ~ %.2f > %.2f\n",
+		fmt.Printf("%s %.2f %.0f (%.2f) (%.2f %.2f) %.2f | %d @ %.2f ~ %.2f > %.2f\n",
 			v.Symbol,
+			v.RSI.Value,
 			v.AvgVolume,
-			v.SMA20.Value,
-			v.MACD._ema12.Value,
-			v.MACD._ema26.Value,
+			v.LastClose(),
 			v.MACD.Line,
 			v.MACD.Signal.Value,
 			v.MACD.Trend,

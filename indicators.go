@@ -109,3 +109,68 @@ func (m *MACD) Add(new *EODData, previous []*EODData, period int, totalPeriods i
 func (m *MACD) Gap() float64 {
 	return m.Line - m.Signal.Value
 }
+
+//
+// RSI
+//
+
+type RSI struct {
+	Periods int
+	AvgGain float64
+	AvgLoss float64
+	Value   float64
+}
+
+const RSI_SMOOTHER = 13.0
+
+func (r *RSI) Init() {
+	r.Periods = 14
+}
+
+func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
+	if period == 0 {
+		return
+	}
+
+	prevClose := 0.0
+
+	if lookBack := previous[period-1]; lookBack != nil {
+		prevClose = lookBack.Close
+	}
+
+	gain := 0.0
+	loss := 0.0
+
+	if prevClose < new.Close {
+		gain = new.Close - prevClose
+	} else {
+		loss = prevClose - new.Close
+	}
+
+	if period <= r.Periods+1 {
+		r.AvgGain = runningAvg(r.AvgGain, period-1, gain)
+		r.AvgLoss = runningAvg(r.AvgLoss, period-1, loss)
+		return
+	}
+
+	r.AvgGain = r.smooth(r.AvgGain, gain)
+	r.AvgLoss = r.smooth(r.AvgLoss, loss)
+	r.Value = 100.0 - (100.0 / (1.0 + (r.AvgGain / r.AvgLoss)))
+}
+
+func (r *RSI) smooth(current float64, new float64) float64 {
+	periods := float64(r.Periods)
+	a := 1.0 / periods
+	b := (periods - 1) / periods
+
+	return a*new + b*current
+}
+
+//
+// utils
+//
+
+func runningAvg(current float64, n int, new float64) float64 {
+	n64 := float64(n)
+	return (current*n64 + new) / (n64 + 1.0)
+}

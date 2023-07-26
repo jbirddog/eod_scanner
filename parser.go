@@ -14,7 +14,7 @@ type EODData struct {
 	High   float64
 	Low    float64
 	Close  float64
-	Volume int
+	Volume float64
 }
 
 const header = "Symbol,Date,Open,High,Low,Close,Volume"
@@ -64,7 +64,7 @@ func parseRow(row string) (*EODData, error) {
 		return nil, err
 	}
 
-	volume, err := strconv.Atoi(parts[6])
+	volume, err := strconv.ParseFloat(parts[6], 64)
 	if err != nil {
 		return nil, err
 	}

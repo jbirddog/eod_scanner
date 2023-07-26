@@ -15,7 +15,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	currentDay := Day(2023, 7, 21)
+	currentDay := Day(2023, 7, 26)
 	dates := PreviousMarketDays(currentDay, marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
@@ -58,6 +58,10 @@ func main() {
 		}
 
 		if v.MACD.Gap() < 0 {
+			continue
+		}
+
+		if v.RSI.Value < 50.0 {
 			continue
 		}
 

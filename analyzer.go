@@ -7,10 +7,11 @@ import (
 type AnalyzedData struct {
 	Symbol     string
 	DataPoints int
-	AvgVolume  int
+	AvgVolume  float64
 	AvgClose   float64
 	MACD       MACD
 	SMA20      SMA
+	RSI        RSI
 	EODData    []*EODData
 }
 
@@ -23,7 +24,7 @@ func (a *AnalyzedData) ClosedUp() bool {
 	return data.Close > data.Open
 }
 
-func (a *AnalyzedData) LastVolume() int {
+func (a *AnalyzedData) LastVolume() float64 {
 	return a.EODData[len(a.EODData)-1].Volume
 }
 
@@ -51,6 +52,7 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 			}
 			data.MACD.Init()
 			data.SMA20.Periods = 20
+			data.RSI.Init()
 			analyzed[symbol] = data
 		}
 		return data
@@ -78,15 +80,10 @@ func addEODData(data *AnalyzedData, record *EODData, day int, days int) {
 }
 
 func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day int, days int) {
-	dp := data.DataPoints
-	dpF := float64(dp)
-	data.AvgVolume = runningAvg(data.AvgVolume, dp, record.Volume)
-	data.AvgClose = runningAvg(data.AvgClose, dpF, record.Close)
+	data.AvgVolume = runningAvg(data.AvgVolume, data.DataPoints, record.Volume)
+	data.AvgClose = runningAvg(data.AvgClose, data.DataPoints, record.Close)
 
 	data.MACD.Add(record, data.EODData, day, days)
 	data.SMA20.Add(record, data.EODData, day)
-}
-
-func runningAvg[T int | float64](current T, n T, new T) T {
-	return (current*n + new) / (n + 1)
+	data.RSI.Add(record, data.EODData, day, days)
 }
