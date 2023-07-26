@@ -147,12 +147,6 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 		loss = prevClose - new.Close
 	}
 
-	if period == 1 {
-		r.AvgGain = gain
-		r.AvgLoss = loss
-		return
-	}
-
 	if period <= r.Periods+1 {
 		r.AvgGain = runningAvg(r.AvgGain, period-1, gain)
 		r.AvgLoss = runningAvg(r.AvgLoss, period-1, loss)
