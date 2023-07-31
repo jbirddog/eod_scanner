@@ -19,9 +19,17 @@ func (a *AnalyzedData) LastClose() float64 {
 	return a.EODData[len(a.EODData)-1].Close
 }
 
-func (a *AnalyzedData) ClosedUp() bool {
-	data := a.EODData[len(a.EODData)-1]
-	return data.Close > data.Open
+func (a *AnalyzedData) LastChange() float64 {
+	days := len(a.EODData)
+
+	if days < 2 {
+		return 0.0
+	}
+
+	close1 := a.EODData[days-1].Close
+	close2 := a.EODData[days-2].Close
+
+	return ((close1 - close2) / close1) * 100.0
 }
 
 func (a *AnalyzedData) LastVolume() float64 {

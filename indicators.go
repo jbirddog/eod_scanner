@@ -121,8 +121,6 @@ type RSI struct {
 	Value   float64
 }
 
-const RSI_SMOOTHER = 13.0
-
 func (r *RSI) Init() {
 	r.Periods = 14
 }
@@ -161,7 +159,7 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 func (r *RSI) smooth(current float64, new float64) float64 {
 	periods := float64(r.Periods)
 	a := 1.0 / periods
-	b := (periods - 1) / periods
+	b := (periods - 1.0) / periods
 
 	return a*new + b*current
 }

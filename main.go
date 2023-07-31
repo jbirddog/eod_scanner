@@ -15,7 +15,7 @@ func main() {
 	}
 
 	// TODO: move to driver, use channels
-	currentDay := Day(2023, 7, 26)
+	currentDay := Day(2023, 7, 31)
 	dates := PreviousMarketDays(currentDay, marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
@@ -53,7 +53,7 @@ func main() {
 		}
 
 		// TODO: break out into buy vs sell signals
-		if !v.ClosedUp() {
+		if v.LastChange() < 0.0 {
 			continue
 		}
 
