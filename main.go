@@ -37,6 +37,10 @@ func main() {
 	}
 
 	analyzedDataBySymbol := Analyze(eodData)
+	strategies := []*Strategy{
+		&MonthClimb,
+	}
+	// TODO: by strategy
 	symbols := make([]*AnalyzedData, 0, len(analyzedDataBySymbol))
 
 	for _, v := range analyzedDataBySymbol {
@@ -44,11 +48,11 @@ func main() {
 			continue
 		}
 
-		if !MonthClimb.SignalDetected(v) {
-			continue
+		for _, strategy := range strategies {
+			if strategy.SignalDetected(v) {
+				symbols = append(symbols, v)
+			}
 		}
-
-		symbols = append(symbols, v)
 	}
 
 	PrintReport(symbols, currentDay)
