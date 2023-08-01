@@ -15,6 +15,7 @@ func main() {
 	marketDayCount := 52
 	strategies := []*Strategy{
 		&MonthClimb,
+		&MonthFall,
 	}
 
 	// TODO: pass in via config
