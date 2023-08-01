@@ -14,8 +14,8 @@ func main() {
 		log.Fatal("Must set environment variable EOD_DATA_DIR")
 	}
 
-	// TODO: move to driver, use channels
-	currentDay := Day(2023, 7, 31)
+	// TODO: move to driver, use channels?
+	currentDay := Day(2023, 8, 1)
 	dates := PreviousMarketDays(currentDay, marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
@@ -44,28 +44,7 @@ func main() {
 			continue
 		}
 
-		if v.AvgVolume < 1000000 || v.AvgClose < 5.0 {
-			continue
-		}
-
-		if v.LastVolume() < v.AvgVolume {
-			continue
-		}
-
-		// TODO: break out into buy vs sell signals
-		if v.LastChange() < 0.0 {
-			continue
-		}
-
-		if v.MACD.Gap() < 0 {
-			continue
-		}
-
-		if v.RSI.Value < 50.0 {
-			continue
-		}
-
-		if v.LastClose() < v.SMA20.Value {
+		if !MonthClimb.SignalDetected(v) {
 			continue
 		}
 

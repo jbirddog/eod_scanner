@@ -8,7 +8,7 @@ import (
 
 func PrintReport(symbols []*AnalyzedData, currentDay time.Time) {
 	sort.Slice(symbols, func(i, j int) bool {
-		return symbols[i].SortWeight() > symbols[j].SortWeight()
+		return MonthClimb.SortWeight(symbols[i]) > MonthClimb.SortWeight(symbols[j])
 	})
 
 	for _, v := range symbols {
