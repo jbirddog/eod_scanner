@@ -23,7 +23,7 @@ func newResults(strategies []*Strategy, detectedCap int) []*ScanResult {
 	return results
 }
 
-func (s *ScanResult) Sort() { // TODO: move to result.Sort()
+func (s *ScanResult) Sort() {
 	sort.Slice(s.Detected, func(i, j int) bool {
 		return s.Strategy.SortWeight(s.Detected[i]) > s.Strategy.SortWeight(s.Detected[j])
 	})
