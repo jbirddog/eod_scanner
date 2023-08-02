@@ -17,6 +17,7 @@ func main() {
 		&MonthClimb,
 		&MonthFall,
 	}
+	writer := &MarkdownWriter{}
 
 	// TODO: pass in via config
 	results, err := Scan(currentDay, marketDayCount, dataDir, strategies)
@@ -24,5 +25,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	PrintReport(results, currentDay)
+	PrintReport(results, currentDay, writer)
 }
