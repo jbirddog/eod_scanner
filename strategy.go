@@ -1,8 +1,16 @@
 package main
 
+type SignalType int
+
+const (
+	Buy SignalType = iota
+	Sell
+)
+
 type Strategy interface {
 	Name() string
 	SignalDetected(a *AnalyzedData) bool
+	SignalType() SignalType
 	SortWeight(a *AnalyzedData) float64
 }
 
@@ -27,6 +35,10 @@ func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 	}
 
 	return true
+}
+
+func (s *MonthClimb) SignalType() SignalType {
+	return Buy
 }
 
 func (s *MonthClimb) SortWeight(a *AnalyzedData) float64 {
@@ -58,6 +70,10 @@ func (s *MonthFall) SignalDetected(a *AnalyzedData) bool {
 	}
 
 	return true
+}
+
+func (s *MonthFall) SignalType() SignalType {
+	return Sell
 }
 
 func (s *MonthFall) SortWeight(a *AnalyzedData) float64 {

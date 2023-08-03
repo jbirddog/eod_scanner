@@ -28,7 +28,7 @@ func (m *MarkdownWriter) WriteSectionHeader(r *ScanResult) {
 
 | Symbol | Vol X | Change | RSI | Volume | Close | MACD Signal | MACD Gap | Shares | Entry | Capitol | Stop Loss |
 |----|----|----|----|----|----|----|----|----|----|----|----|
-`, r.Strategy.Name)
+`, r.Strategy.Name())
 }
 
 func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64) {

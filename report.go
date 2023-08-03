@@ -14,8 +14,10 @@ func PrintReport(results []*ScanResult, currentDay time.Time, writer Writer) {
 		result.Sort()
 		writer.WriteSectionHeader(result)
 
+		signalType := result.Strategy.SignalType()
+
 		for _, v := range result.Detected {
-			p := PositionFromAnalyzedData(v, riskPerTrade)
+			p := PositionFromAnalyzedData(v, riskPerTrade, signalType)
 			writer.WriteRecord(v, p, riskPerTrade)
 		}
 
