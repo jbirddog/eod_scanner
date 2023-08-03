@@ -26,38 +26,30 @@ func (m *MarkdownWriter) WriteHeader(currentDay time.Time) {
 func (m *MarkdownWriter) WriteSectionHeader(r *ScanResult) {
 	fmt.Printf(`## Strategy '%s'
 
-| Symbol | RSI | AvgVolume | Close | Change | MACD | MACD Signal | MACD Trend | Shares | Entry | Capitol | Stop Loss |
+| Symbol | Vol X | Change | RSI | Volume | Close | MACD Signal | MACD Gap | Shares | Entry | Capitol | Stop Loss |
 |----|----|----|----|----|----|----|----|----|----|----|----|
 `, r.Strategy.Name)
 }
 
 func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64) {
-	fmt.Print("RECORD")
-	/*
-	
-			// TODO: string builder or buffered writer?
-			fmt.Printf("%s %.2f %.0f (%.2f %.2f) (%.2f %.2f) %.2f | %d @ %.2f ~ %.2f > %.2f\n",
-				v.Symbol,
-				v.RSI.Value,
-				v.AvgVolume,
-				v.LastClose(),
-				v.LastChange(),
-				v.MACD.Line,
-				v.MACD.Signal.Value,
-				v.MACD.Trend,
-				p.Shares,
-				p.Entry,
-				p.Capitol,
-				p.StopLoss)
-		}
+	fmt.Printf("| %s | %.2f | %.2f | %.2f | %.0f | %.2f | %.2f | %.2f | %d | %.2f | %.2f | %.2f |\n",
+		a.Symbol,
+		a.LastVolumeMultiplier(),
+		a.LastChange(),
+		a.RSI.Value,
+		a.LastVolume(),
+		a.LastClose(),
+		a.MACD.Signal.Value,
+		a.MACD.Gap(),
+		p.Shares,
+		p.Entry,
+		p.Capitol,
+		p.StopLoss)
 
-	*/
 }
 
 func (m *MarkdownWriter) WriteSectionFooter(r *ScanResult) {
-	fmt.Printf("Strategy '%s' found %d symbols.\n\n",
-		r.Strategy.Name,
-		len(r.Detected))
+	fmt.Printf("\n%d symbols.\n\n", len(r.Detected))
 }
 
 func (m *MarkdownWriter) WriteFooter() {

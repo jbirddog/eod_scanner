@@ -31,7 +31,7 @@ func mc_SignalDetected(a *AnalyzedData) bool {
 
 func mc_SortWeight(a *AnalyzedData) float64 {
 	macdWeight := a.MACD.Line * a.MACD.Gap()
-	volumeWeight := a.LastVolume() / a.AvgVolume
+	volumeWeight := a.LastVolumeMultiplier()
 	weight := macdWeight * volumeWeight
 
 	return weight
@@ -62,7 +62,7 @@ func mf_SignalDetected(a *AnalyzedData) bool {
 
 func mf_SortWeight(a *AnalyzedData) float64 {
 	macdWeight := a.MACD.Signal.Value * a.MACD.Gap()
-	volumeWeight := a.LastVolume() / a.AvgVolume
+	volumeWeight := a.LastVolumeMultiplier()
 	weight := macdWeight * volumeWeight
 
 	return weight

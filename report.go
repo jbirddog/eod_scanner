@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -18,21 +17,6 @@ func PrintReport(results []*ScanResult, currentDay time.Time, writer Writer) {
 		for _, v := range result.Detected {
 			p := PositionFromAnalyzedData(v, riskPerTrade)
 			writer.WriteRecord(v, p, riskPerTrade)
-
-			// TODO: string builder or buffered writer?
-			fmt.Printf("%s %.2f %.0f (%.2f %.2f) (%.2f %.2f) %.2f | %d @ %.2f ~ %.2f > %.2f\n",
-				v.Symbol,
-				v.RSI.Value,
-				v.AvgVolume,
-				v.LastClose(),
-				v.LastChange(),
-				v.MACD.Line,
-				v.MACD.Signal.Value,
-				v.MACD.Trend,
-				p.Shares,
-				p.Entry,
-				p.Capitol,
-				p.StopLoss)
 		}
 
 		writer.WriteSectionFooter(result)
