@@ -1,22 +1,22 @@
 package main
 
-type Strategy struct {
-	Name           string
-	SignalDetected func(*AnalyzedData) bool
-	SortWeight     func(*AnalyzedData) float64
+type Strategy interface {
+	Name() string
+	SignalDetected(a *AnalyzedData) bool
+	SortWeight(a *AnalyzedData) float64
 }
 
 //
 // Month Climb
 //
 
-var MonthClimb = Strategy{
-	Name:           "Month Climb",
-	SignalDetected: mc_SignalDetected,
-	SortWeight:     mc_SortWeight,
+type MonthClimb struct{}
+
+func (s *MonthClimb) Name() string {
+	return "Month Climb"
 }
 
-func mc_SignalDetected(a *AnalyzedData) bool {
+func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 	if a.AvgVolume < 1000000 || a.AvgClose < 5.0 ||
 		a.LastVolume() < a.AvgVolume ||
 		a.LastChange() < 0.0 ||
@@ -29,7 +29,7 @@ func mc_SignalDetected(a *AnalyzedData) bool {
 	return true
 }
 
-func mc_SortWeight(a *AnalyzedData) float64 {
+func (s *MonthClimb) SortWeight(a *AnalyzedData) float64 {
 	macdWeight := a.MACD.Line * a.MACD.Gap()
 	volumeWeight := a.LastVolumeMultiplier()
 	weight := macdWeight * volumeWeight
@@ -41,13 +41,13 @@ func mc_SortWeight(a *AnalyzedData) float64 {
 // Month Fall
 //
 
-var MonthFall = Strategy{
-	Name:           "Month Fall",
-	SignalDetected: mf_SignalDetected,
-	SortWeight:     mf_SortWeight,
+type MonthFall struct{}
+
+func (s *MonthFall) Name() string {
+	return "Month Fall"
 }
 
-func mf_SignalDetected(a *AnalyzedData) bool {
+func (s *MonthFall) SignalDetected(a *AnalyzedData) bool {
 	if a.AvgVolume < 1000000 || a.AvgClose < 5.0 ||
 		a.LastVolume() < a.AvgVolume ||
 		a.LastChange() > 0.0 ||
@@ -60,7 +60,7 @@ func mf_SignalDetected(a *AnalyzedData) bool {
 	return true
 }
 
-func mf_SortWeight(a *AnalyzedData) float64 {
+func (s *MonthFall) SortWeight(a *AnalyzedData) float64 {
 	macdWeight := a.MACD.Signal.Value * a.MACD.Gap()
 	volumeWeight := a.LastVolumeMultiplier()
 	weight := macdWeight * volumeWeight
