@@ -7,12 +7,8 @@ import (
 type AnalyzedData struct {
 	Symbol     string
 	DataPoints int
-	AvgVolume  float64
-	AvgClose   float64
-	MACD       MACD
-	SMA20      SMA
-	RSI        RSI
 	EODData    []*EODData
+	Indicators Indicators
 }
 
 func (a *AnalyzedData) LastClose() float64 {
@@ -37,7 +33,7 @@ func (a *AnalyzedData) LastVolume() float64 {
 }
 
 func (a *AnalyzedData) LastVolumeMultiplier() float64 {
-	return a.LastVolume() / a.AvgVolume
+	return a.LastVolume() / a.Indicators.AvgVolume
 }
 
 type AnalyzedDataBySymbol = map[string]*AnalyzedData
@@ -54,9 +50,7 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 				Symbol:  symbol,
 				EODData: make([]*EODData, days),
 			}
-			data.MACD.Init()
-			data.SMA20.Periods = 20
-			data.RSI.Init()
+			data.Indicators.Init()
 			analyzed[symbol] = data
 		}
 		return data
@@ -77,17 +71,7 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 }
 
 func addEODData(data *AnalyzedData, record *EODData, day int, days int) {
-	performConstantTimeCalculations(data, record, day, days)
-
+	data.Indicators.Add(record, data.EODData, day, days)
 	data.EODData[day] = record
 	data.DataPoints += 1
-}
-
-func performConstantTimeCalculations(data *AnalyzedData, record *EODData, day int, days int) {
-	data.AvgVolume = runningAvg(data.AvgVolume, data.DataPoints, record.Volume)
-	data.AvgClose = runningAvg(data.AvgClose, data.DataPoints, record.Close)
-
-	data.MACD.Add(record, data.EODData, day, days)
-	data.SMA20.Add(record, data.EODData, day)
-	data.RSI.Add(record, data.EODData, day, days)
 }

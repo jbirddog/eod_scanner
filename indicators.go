@@ -2,6 +2,38 @@ package main
 
 // TODO: need to add some tests for these indicators
 
+type Indicators struct {
+	AvgVolume float64
+	AvgClose  float64
+	EMA8      EMA
+	EMA12     EMA
+	EMA26     EMA
+	SMA20     SMA
+	RSI       RSI
+	MACD      MACD
+}
+
+func (i *Indicators) Init() {
+	i.EMA8.Init(8)
+	i.EMA12.Init(12)
+	i.EMA26.Init(26)
+	i.SMA20.Periods = 20
+	i.RSI.Periods = 14
+	i.MACD.Init(&i.EMA12, &i.EMA26, 9)
+}
+
+func (i *Indicators) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
+	i.AvgVolume = runningAvg(i.AvgVolume, period, new.Volume)
+	i.AvgClose = runningAvg(i.AvgClose, period, new.Close)
+
+	i.EMA8.Add(new, previous, period, totalPeriods)
+	i.EMA12.Add(new, previous, period, totalPeriods)
+	i.EMA26.Add(new, previous, period, totalPeriods)
+	i.SMA20.Add(new, previous, period)
+	i.RSI.Add(new, previous, period, totalPeriods)
+	i.MACD.Add(new, previous, period, totalPeriods)
+}
+
 //
 // SMA
 //
@@ -72,31 +104,25 @@ type MACD struct {
 	Line   float64
 	Signal EMA
 	Flags  int
-	Trend  float64
-	_ema12 EMA
-	_ema26 EMA
+	_fast  *EMA
+	_slow  *EMA
 }
 
-func (m *MACD) Init() {
-	m._ema12.Init(12)
-	m._ema26.Init(26)
-	m.Signal.Init(9)
+func (m *MACD) Init(fast *EMA, slow *EMA, signalPeriods int) {
+	m._fast = fast
+	m._slow = slow
+	m.Signal.Init(signalPeriods)
 }
 
 func (m *MACD) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
-	m._ema12.Add(new, previous, period, totalPeriods)
-	m._ema26.Add(new, previous, period, totalPeriods)
-
 	daysLeft := totalPeriods - period
-	prev := m.Line
-	m.Line = m._ema12.Value - m._ema26.Value
+	m.Line = m._fast.Value - m._slow.Value
 
 	if daysLeft > m.Signal.Periods {
 		m.Signal.Value = m.Line
 		return
 	}
 
-	m.Trend += m.Line - prev
 	m.Signal.AddPoint(m.Line)
 
 	if m.Line > m.Signal.Value {
@@ -119,10 +145,6 @@ type RSI struct {
 	AvgGain float64
 	AvgLoss float64
 	Value   float64
-}
-
-func (r *RSI) Init() {
-	r.Periods = 14
 }
 
 func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
