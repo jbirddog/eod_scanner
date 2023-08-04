@@ -26,13 +26,13 @@ func (m *MarkdownWriter) WriteHeader(currentDay time.Time) {
 func (m *MarkdownWriter) WriteSectionHeader(r *ScanResult) {
 	fmt.Printf(`## Strategy '%s'
 
-| Symbol | Vol X | Change | RSI | Volume | Close | MACD Signal | MACD Gap | Shares | Entry | Capitol | Stop Loss |
-|----|----|----|----|----|----|----|----|----|----|----|----|
+| Symbol | Vol X | Change | RSI | Volume | Close | MACD Signal | MACD Gap | Position | Shares | Entry | Capitol | Stop Loss |
+|----|----|----|----|----|----|----|----|----|----|----|----|----|
 `, r.Strategy.Name())
 }
 
 func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64) {
-	fmt.Printf("| %s | %.2f | %.2f | %.2f | %.0f | %.2f | %.2f | %.2f | %d | %.2f | %.2f | %.2f |\n",
+	fmt.Printf("| %s | %.2f | %.2f | %.2f | %.0f | %.2f | %.2f | %.2f | %s | %d | %.2f | %.2f | %.2f |\n",
 		a.Symbol,
 		a.LastVolumeMultiplier(),
 		a.LastChange(),
@@ -41,6 +41,7 @@ func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64)
 		a.LastClose(),
 		a.MACD.Signal.Value,
 		a.MACD.Gap(),
+		p.Type.String(),
 		p.Shares,
 		p.Entry,
 		p.Capitol,

@@ -7,6 +7,18 @@ const (
 	Short
 )
 
+// TODO: stringer when looking into go build for other things
+func (t PositionType) String() string {
+	switch t {
+	case Long:
+		return "Long"
+	case Short:
+		return "Short"
+	default:
+		panic("Unknown PositionType")
+	}
+}
+
 type Position struct {
 	Type     PositionType
 	Shares   int
