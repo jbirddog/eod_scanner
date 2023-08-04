@@ -25,12 +25,13 @@ func (s *MonthClimb) Name() string {
 }
 
 func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
-	if a.AvgVolume < 1000000 || a.AvgClose < 5.0 ||
-		a.LastVolume() < a.AvgVolume ||
+	i := a.Indicators
+	if i.AvgVolume < 1000000 || i.AvgClose < 5.0 ||
+		a.LastVolume() < i.AvgVolume ||
 		a.LastChange() < 0.0 ||
-		a.MACD.Gap() < 0.0 ||
-		a.RSI.Value < 50.0 ||
-		a.LastClose() < a.SMA20.Value {
+		i.MACD.Gap() < 0.0 ||
+		i.RSI.Value < 50.0 ||
+		a.LastClose() < i.SMA20.Value {
 		return false
 	}
 
@@ -42,7 +43,8 @@ func (s *MonthClimb) SignalType() SignalType {
 }
 
 func (s *MonthClimb) SortWeight(a *AnalyzedData) float64 {
-	macdWeight := a.MACD.Line * a.MACD.Gap()
+	macd := a.Indicators.MACD
+	macdWeight := macd.Line * macd.Gap()
 	volumeWeight := a.LastVolumeMultiplier()
 	weight := macdWeight * volumeWeight
 
@@ -60,12 +62,13 @@ func (s *MonthFall) Name() string {
 }
 
 func (s *MonthFall) SignalDetected(a *AnalyzedData) bool {
-	if a.AvgVolume < 1000000 || a.AvgClose < 5.0 ||
-		a.LastVolume() < a.AvgVolume ||
+	i := a.Indicators
+	if i.AvgVolume < 1000000 || i.AvgClose < 5.0 ||
+		a.LastVolume() < i.AvgVolume ||
 		a.LastChange() > 0.0 ||
-		a.MACD.Gap() > 0.0 ||
-		a.RSI.Value > 50.0 ||
-		a.LastClose() > a.SMA20.Value {
+		i.MACD.Gap() > 0.0 ||
+		i.RSI.Value > 50.0 ||
+		a.LastClose() > i.SMA20.Value {
 		return false
 	}
 
@@ -77,7 +80,8 @@ func (s *MonthFall) SignalType() SignalType {
 }
 
 func (s *MonthFall) SortWeight(a *AnalyzedData) float64 {
-	macdWeight := a.MACD.Signal.Value * a.MACD.Gap()
+	macd := a.Indicators.MACD
+	macdWeight := macd.Signal.Value * macd.Gap()
 	volumeWeight := a.LastVolumeMultiplier()
 	weight := macdWeight * volumeWeight
 

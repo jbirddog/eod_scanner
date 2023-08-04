@@ -29,7 +29,7 @@ type Position struct {
 
 func PositionFromAnalyzedData(data *AnalyzedData, risk float64, signalType SignalType) *Position {
 	entry := data.LastClose()
-	stopLoss := data.SMA20.Value
+	stopLoss := data.Indicators.SMA20.Value
 
 	var positionType PositionType
 	var riskPerShare float64
