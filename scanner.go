@@ -6,11 +6,11 @@ import (
 )
 
 type ScanResult struct {
-	Strategy *Strategy
+	Strategy Strategy
 	Detected []*AnalyzedData
 }
 
-func newResults(strategies []*Strategy, detectedCap int) []*ScanResult {
+func newResults(strategies []Strategy, detectedCap int) []*ScanResult {
 	results := make([]*ScanResult, len(strategies))
 
 	for i, strategy := range strategies {
@@ -30,7 +30,7 @@ func (s *ScanResult) Sort() {
 
 }
 
-func Scan(currentDay time.Time, marketDayCount int, dataDir string, strategies []*Strategy) ([]*ScanResult, error) {
+func Scan(currentDay time.Time, marketDayCount int, dataDir string, strategies []Strategy) ([]*ScanResult, error) {
 	// TODO: use channels?
 	dates := PreviousMarketDays(currentDay, marketDayCount)
 	// TODO: AMEX, NYSE
