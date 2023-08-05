@@ -29,7 +29,7 @@ var columns = []struct {
 	{"Symbol", "%s"},
 	{"Vol X", "%.2f"},
 	{"RSI", "%.2f"},
-	{"Close", "%.2f %.2f%% %.2f %.2f"},
+	{"Close", "%.2f %.2f%% %.2f %.2f %.2f %.2f"},
 	{"MACD", "%.2f %.2f"},
 	/*
 	{"Position", "%s"},
@@ -96,8 +96,10 @@ i := a.Indicators
 		i.RSI.Value,
 		a.LastClose(),
 		a.LastChange(),
-		i.EMA8.Value,
 		i.SMA20.Value,
+		i.EMA8.Value,
+		i.EMA12.Value,
+		i.EMA26.Value,
 		i.MACD.Line,
 		i.MACD.Signal.Value)
 		/*

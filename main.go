@@ -12,7 +12,7 @@ func main() {
 	}
 
 	currentDay := Day(2023, 8, 5)
-	marketDayCount := 52
+	marketDayCount := 65
 	strategies := []Strategy{
 		&MonthClimb{},
 		//&MonthFall{},

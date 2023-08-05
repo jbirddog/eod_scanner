@@ -62,6 +62,9 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 
 	for i, dailyData := range eodData {
 		for _, record := range dailyData {
+		if record.Symbol != "FYBR" {
+		continue
+		}
 			data := analyzedDataForSymbol(record.Symbol)
 			addEODData(data, record, i, days)
 		}

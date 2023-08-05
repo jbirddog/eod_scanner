@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // TODO: need to add some tests for these indicators
 
 type Indicators struct {
@@ -78,17 +80,26 @@ func (e *EMA) Init(periods int) {
 
 func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
 	daysLeft := totalPeriods - period
-	if daysLeft > e.Periods {
+	if period < e.Periods {
 		e._sma.Add(new, previous, period)
 		e.Value = e._sma.Value
+		
+	if e.Periods == 8 && daysLeft == 9 {
+	fmt.Printf("XX %d - %d %s %.2f\n", e.Periods, period, new.Date, e.Value)
+	}
 		return
 	}
 
 	e.AddPoint(new.Close)
+	
+	if e.Periods == 26 {
+	fmt.Printf("%d - %d %s %.2f\n", e.Periods, daysLeft, new.Date, e.Value)
+	}
 }
 
 func (e *EMA) AddPoint(new float64) {
-	e.Value = (new * e.Weight) + (e.Value * (1.0 - e.Weight))
+	//e.Value = (new * e.Weight) + (e.Value * (1.0 - e.Weight))
+	e.Value = ((new - e.Value) * e.Weight) + e.Value
 }
 
 //
