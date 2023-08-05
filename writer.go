@@ -32,11 +32,11 @@ var columns = []struct {
 	{"Close", "%.2f %.2f%% %.2f %.2f %.2f %.2f"},
 	{"MACD", "%.2f %.2f"},
 	/*
-	{"Position", "%s"},
-	{"Shares", "%d"},
-	{"Entry", "%.2f"},
-	{"Capitol", "%.2f"},
-	{"Stop Loss", "%.2f"},
+		{"Position", "%s"},
+		{"Shares", "%d"},
+		{"Entry", "%.2f"},
+		{"Capitol", "%.2f"},
+		{"Stop Loss", "%.2f"},
 	*/
 }
 
@@ -89,7 +89,7 @@ func (m *MarkdownWriter) WriteSectionHeader(r *ScanResult) {
 }
 
 func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64) {
-i := a.Indicators
+	i := a.Indicators
 	fmt.Printf(m._recordFmt,
 		a.Symbol,
 		a.LastVolumeMultiplier(),
@@ -102,13 +102,13 @@ i := a.Indicators
 		i.EMA26.Value,
 		i.MACD.Line,
 		i.MACD.Signal.Value)
-		/*
+	/*
 		p.Type.String(),
 		p.Shares,
 		p.Entry,
 		p.Capitol,
 		p.StopLoss)
-		*/
+	*/
 }
 
 func (m *MarkdownWriter) WriteSectionFooter(r *ScanResult) {
