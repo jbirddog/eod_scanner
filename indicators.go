@@ -98,7 +98,6 @@ func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 }
 
 func (e *EMA) AddPoint(new float64) {
-	//e.Value = (new * e.Weight) + (e.Value * (1.0 - e.Weight))
 	e.Value = ((new - e.Value) * e.Weight) + e.Value
 }
 
@@ -126,10 +125,9 @@ func (m *MACD) Init(fast *EMA, slow *EMA, signalPeriods int) {
 }
 
 func (m *MACD) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
-	daysLeft := totalPeriods - period
 	m.Line = m._fast.Value - m._slow.Value
 
-	if daysLeft > m.Signal.Periods {
+	if period < m.Signal.Periods {
 		m.Signal.Value = m.Line
 		return
 	}
