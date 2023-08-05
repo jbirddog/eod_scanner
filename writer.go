@@ -22,26 +22,22 @@ func headerDateString(currentDay time.Time) string {
 	return PreviousMarketDay(currentDay).Format("01/02/2006")
 }
 
-const intFmt = "%d"
-const floatFmt = "%.2f"
-const stringFmt = "%s"
-
 var columns = []struct {
 	Lbl string
 	Fmt string
 }{
-	{"Symbol", stringFmt},
-	{"Vol X", floatFmt},
-	{"Change", floatFmt},
-	{"RSI", floatFmt},
-	{"Close", floatFmt},
-	{"MACD Signal", floatFmt},
-	{"MACD Gap", floatFmt},
-	{"Position", stringFmt},
-	{"Shares", intFmt},
-	{"Entry", floatFmt},
-	{"Capitol", floatFmt},
-	{"Stop Loss", floatFmt},
+	{"Symbol", "%s"},
+	{"Vol X", "%.2f"},
+	{"RSI", "%.2f"},
+	{"Close", "%.2f %.2f%% %.2f %.2f"},
+	{"MACD", "%.2f %.2f"},
+	/*
+	{"Position", "%s"},
+	{"Shares", "%d"},
+	{"Entry", "%.2f"},
+	{"Capitol", "%.2f"},
+	{"Stop Loss", "%.2f"},
+	*/
 }
 
 func columnFields() ([]string, []string) {
@@ -93,20 +89,24 @@ func (m *MarkdownWriter) WriteSectionHeader(r *ScanResult) {
 }
 
 func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64) {
+i := a.Indicators
 	fmt.Printf(m._recordFmt,
 		a.Symbol,
 		a.LastVolumeMultiplier(),
-		a.LastChange(),
-		a.Indicators.RSI.Value,
+		i.RSI.Value,
 		a.LastClose(),
-		a.Indicators.MACD.Signal.Value,
-		a.Indicators.MACD.Gap(),
+		a.LastChange(),
+		i.EMA8.Value,
+		i.SMA20.Value,
+		i.MACD.Line,
+		i.MACD.Signal.Value)
+		/*
 		p.Type.String(),
 		p.Shares,
 		p.Entry,
 		p.Capitol,
 		p.StopLoss)
-
+		*/
 }
 
 func (m *MarkdownWriter) WriteSectionFooter(r *ScanResult) {
