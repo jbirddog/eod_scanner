@@ -11,13 +11,13 @@ func main() {
 		log.Fatal("Must set environment variable EOD_DATA_DIR")
 	}
 
-	currentDay := Day(2023, 8, 4)
+	currentDay := Day(2023, 8, 5)
 	marketDayCount := 52
 	strategies := []Strategy{
 		&MonthClimb{},
-		&MonthFall{},
+		//&MonthFall{},
 	}
-	writer := &MarkdownWriter{}
+	writer := NewMarkdownWriter()
 
 	// TODO: pass in via config
 	results, err := Scan(currentDay, marketDayCount, dataDir, strategies)
