@@ -92,11 +92,11 @@ func TestPreviousMarketDays(t *testing.T) {
 
 	for _, c := range cases {
 		actual := PreviousMarketDays(c.start, len(c.expected))
-		a_len := len(actual)
-		e_len := len(c.expected)
+		aLen := len(actual)
+		eLen := len(c.expected)
 
-		if a_len != e_len {
-			t.Fatalf("Expected %d previous market days, got %d", e_len, a_len)
+		if aLen != eLen {
+			t.Fatalf("Expected %d previous market days, got %d", eLen, aLen)
 		}
 
 		for i, a := range actual {

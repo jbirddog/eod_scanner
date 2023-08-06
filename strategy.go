@@ -14,6 +14,13 @@ type Strategy interface {
 	SortWeight(a *AnalyzedData) float64
 }
 
+func hasLowVolumeOrPrice(a *AnalyzedData) bool {
+	avgClose := a.Indicators.AvgClose
+	avgVol := a.Indicators.AvgVolume
+
+	return avgVol < 1000000 || a.LastVolume() < avgVol || avgClose < 5.0
+}
+
 //
 // Month Climb
 //
@@ -26,12 +33,20 @@ func (s *MonthClimb) Name() string {
 
 func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 	i := a.Indicators
-	if i.AvgVolume < 1000000 || i.AvgClose < 5.0 ||
-		a.LastVolume() < i.AvgVolume ||
-		a.LastChange() < 0.0 ||
-		i.MACD.Gap() < 0.0 ||
-		i.RSI.Value < 50.0 ||
-		a.LastClose() < i.SMA20.Value {
+
+	if hasLowVolumeOrPrice(a) {
+		return false
+	}
+
+	if a.LastChange() < 0.0 || a.LastClose() < i.SMA20.Value {
+		return false
+	}
+
+	if i.RSI.Value < 50 || i.RSI.Lookback.LossyValue(5)+15.0 > i.RSI.Value {
+		return false
+	}
+
+	if i.MACD.Gap() < 0.0 {
 		return false
 	}
 
@@ -43,12 +58,7 @@ func (s *MonthClimb) SignalType() SignalType {
 }
 
 func (s *MonthClimb) SortWeight(a *AnalyzedData) float64 {
-	macd := a.Indicators.MACD
-	macdWeight := macd.Line * macd.Gap()
-	volumeWeight := a.LastVolumeMultiplier()
-	weight := macdWeight * volumeWeight
-
-	return weight
+	return -a.Indicators.MACD.Line
 }
 
 //
@@ -63,12 +73,20 @@ func (s *MonthFall) Name() string {
 
 func (s *MonthFall) SignalDetected(a *AnalyzedData) bool {
 	i := a.Indicators
-	if i.AvgVolume < 1000000 || i.AvgClose < 5.0 ||
-		a.LastVolume() < i.AvgVolume ||
-		a.LastChange() > 0.0 ||
-		i.MACD.Gap() > 0.0 ||
-		i.RSI.Value > 50.0 ||
-		a.LastClose() > i.SMA20.Value {
+
+	if hasLowVolumeOrPrice(a) {
+		return false
+	}
+
+	if a.LastChange() > 0.0 || a.LastClose() > i.SMA20.Value {
+		return false
+	}
+
+	if i.RSI.Value > 50 || i.RSI.Lookback.LossyValue(5)-15.0 < i.RSI.Value {
+		return false
+	}
+
+	if i.MACD.Gap() > 0.0 {
 		return false
 	}
 
@@ -80,10 +98,5 @@ func (s *MonthFall) SignalType() SignalType {
 }
 
 func (s *MonthFall) SortWeight(a *AnalyzedData) float64 {
-	macd := a.Indicators.MACD
-	macdWeight := macd.Signal.Value * macd.Gap()
-	volumeWeight := a.LastVolumeMultiplier()
-	weight := macdWeight * volumeWeight
-
-	return weight
+	return a.Indicators.MACD.Line
 }

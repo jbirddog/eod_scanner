@@ -67,20 +67,19 @@ type EMA struct {
 	Periods int
 	Weight  float64
 	Value   float64
-	_sma    SMA
+	sma     SMA
 }
 
 func (e *EMA) Init(periods int) {
 	e.Periods = periods
 	e.Weight = 2.0 / (1.0 + float64(periods))
-	e._sma.Periods = periods
+	e.sma.Periods = periods
 }
 
 func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
-	daysLeft := totalPeriods - period
-	if daysLeft > e.Periods {
-		e._sma.Add(new, previous, period)
-		e.Value = e._sma.Value
+	if period < e.Periods {
+		e.sma.Add(new, previous, period)
+		e.Value = e.sma.Value
 		return
 	}
 
@@ -88,47 +87,41 @@ func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 }
 
 func (e *EMA) AddPoint(new float64) {
-	e.Value = (new * e.Weight) + (e.Value * (1.0 - e.Weight))
+	e.Value = ((new - e.Value) * e.Weight) + e.Value
 }
 
 //
 // MACD
 //
 
-const (
-	MACDWas_Pos = 1 << iota
-	MACDWas_Neg
-)
-
 type MACD struct {
-	Line   float64
-	Signal EMA
-	Flags  int
-	_fast  *EMA
-	_slow  *EMA
+	Line            float64
+	Signal          EMA
+	PositivePeriods uint64
+	fast            *EMA
+	slow            *EMA
 }
 
 func (m *MACD) Init(fast *EMA, slow *EMA, signalPeriods int) {
-	m._fast = fast
-	m._slow = slow
+	m.fast = fast
+	m.slow = slow
 	m.Signal.Init(signalPeriods)
 }
 
 func (m *MACD) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
-	daysLeft := totalPeriods - period
-	m.Line = m._fast.Value - m._slow.Value
+	m.Line = m.fast.Value - m.slow.Value
 
-	if daysLeft > m.Signal.Periods {
+	if period < m.Signal.Periods {
 		m.Signal.Value = m.Line
 		return
 	}
 
 	m.Signal.AddPoint(m.Line)
 
+	m.PositivePeriods <<= 1
+
 	if m.Line > m.Signal.Value {
-		m.Flags |= MACDWas_Pos
-	} else {
-		m.Flags |= MACDWas_Neg
+		m.PositivePeriods |= 1
 	}
 }
 
@@ -141,10 +134,11 @@ func (m *MACD) Gap() float64 {
 //
 
 type RSI struct {
-	Periods int
-	AvgGain float64
-	AvgLoss float64
-	Value   float64
+	Periods  int
+	AvgGain  float64
+	AvgLoss  float64
+	Value    float64
+	Lookback U8LossyLookback
 }
 
 func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
@@ -176,6 +170,8 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 	r.AvgGain = r.smooth(r.AvgGain, gain)
 	r.AvgLoss = r.smooth(r.AvgLoss, loss)
 	r.Value = 100.0 - (100.0 / (1.0 + (r.AvgGain / r.AvgLoss)))
+
+	r.Lookback.Push(r.Value)
 }
 
 func (r *RSI) smooth(current float64, new float64) float64 {
@@ -184,13 +180,4 @@ func (r *RSI) smooth(current float64, new float64) float64 {
 	b := (periods - 1.0) / periods
 
 	return a*new + b*current
-}
-
-//
-// utils
-//
-
-func runningAvg(current float64, n int, new float64) float64 {
-	n64 := float64(n)
-	return (current*n64 + new) / (n64 + 1.0)
 }
