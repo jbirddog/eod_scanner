@@ -9,8 +9,8 @@ import (
 )
 
 func EODFilePath(dir string, exchange string, date time.Time) string {
-	file_name := fmt.Sprintf("%s_%d%02d%02d.csv", exchange, date.Year(), date.Month(), date.Day())
-	return path.Join(dir, file_name)
+	fileName := fmt.Sprintf("%s_%d%02d%02d.csv", exchange, date.Year(), date.Month(), date.Day())
+	return path.Join(dir, fileName)
 }
 
 func LoadEODFile(dir string, exchange string, date time.Time) ([]string, error) {

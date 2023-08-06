@@ -67,19 +67,19 @@ type EMA struct {
 	Periods int
 	Weight  float64
 	Value   float64
-	_sma    SMA
+	sma     SMA
 }
 
 func (e *EMA) Init(periods int) {
 	e.Periods = periods
 	e.Weight = 2.0 / (1.0 + float64(periods))
-	e._sma.Periods = periods
+	e.sma.Periods = periods
 }
 
 func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
 	if period < e.Periods {
-		e._sma.Add(new, previous, period)
-		e.Value = e._sma.Value
+		e.sma.Add(new, previous, period)
+		e.Value = e.sma.Value
 		return
 	}
 
@@ -98,18 +98,18 @@ type MACD struct {
 	Line            float64
 	Signal          EMA
 	PositivePeriods uint64
-	_fast           *EMA
-	_slow           *EMA
+	fast            *EMA
+	slow            *EMA
 }
 
 func (m *MACD) Init(fast *EMA, slow *EMA, signalPeriods int) {
-	m._fast = fast
-	m._slow = slow
+	m.fast = fast
+	m.slow = slow
 	m.Signal.Init(signalPeriods)
 }
 
 func (m *MACD) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
-	m.Line = m._fast.Value - m._slow.Value
+	m.Line = m.fast.Value - m.slow.Value
 
 	if period < m.Signal.Periods {
 		m.Signal.Value = m.Line
@@ -134,10 +134,10 @@ func (m *MACD) Gap() float64 {
 //
 
 type RSI struct {
-	Periods   int
-	AvgGain   float64
-	AvgLoss   float64
-	Value     float64
+	Periods  int
+	AvgGain  float64
+	AvgLoss  float64
+	Value    float64
 	Lookback U8LossyLookback
 }
 

@@ -58,8 +58,8 @@ func columnFields() ([]string, []string) {
 //
 
 type MarkdownWriter struct {
-	_tableHeader string
-	_recordFmt   string
+	tableHeader string
+	recordFmt   string
 }
 
 func NewMarkdownWriter() *MarkdownWriter {
@@ -73,12 +73,12 @@ func NewMarkdownWriter() *MarkdownWriter {
 }
 
 func (m *MarkdownWriter) setTableHeader(lbls []string) {
-	m._tableHeader = fmt.Sprintf("| %s |\n|%s\n",
+	m.tableHeader = fmt.Sprintf("| %s |\n|%s\n",
 		strings.Join(lbls, " | "), strings.Repeat("----|", len(lbls)))
 }
 
 func (m *MarkdownWriter) setRecordFmt(fmts []string) {
-	m._recordFmt = fmt.Sprintf("| %s |\n", strings.Join(fmts, " | "))
+	m.recordFmt = fmt.Sprintf("| %s |\n", strings.Join(fmts, " | "))
 }
 
 func (m *MarkdownWriter) WriteHeader(currentDay time.Time) {
@@ -86,14 +86,14 @@ func (m *MarkdownWriter) WriteHeader(currentDay time.Time) {
 }
 
 func (m *MarkdownWriter) WriteSectionHeader(r *ScanResult) {
-	fmt.Printf("## %s '%s'\n\n%s", sectionHeaderText, r.Strategy.Name(), m._tableHeader)
+	fmt.Printf("## %s '%s'\n\n%s", sectionHeaderText, r.Strategy.Name(), m.tableHeader)
 }
 
 func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64) {
 	i := a.Indicators
 	lastClose := a.LastClose()
 
-	fmt.Printf(m._recordFmt,
+	fmt.Printf(m.recordFmt,
 		a.Symbol,
 		a.LastVolumeMultiplier(),
 		a.LastChange(),
