@@ -43,12 +43,7 @@ func (s *MonthClimb) SignalType() SignalType {
 }
 
 func (s *MonthClimb) SortWeight(a *AnalyzedData) float64 {
-	macd := a.Indicators.MACD
-	macdWeight := macd.Line * macd.Gap()
-	volumeWeight := a.LastVolumeMultiplier()
-	weight := macdWeight * volumeWeight
-
-	return weight
+	return -a.Indicators.MACD.Line
 }
 
 //
@@ -80,10 +75,5 @@ func (s *MonthFall) SignalType() SignalType {
 }
 
 func (s *MonthFall) SortWeight(a *AnalyzedData) float64 {
-	macd := a.Indicators.MACD
-	macdWeight := macd.Signal.Value * macd.Gap()
-	volumeWeight := a.LastVolumeMultiplier()
-	weight := macdWeight * volumeWeight
-
-	return weight
+	return a.Indicators.MACD.Line
 }

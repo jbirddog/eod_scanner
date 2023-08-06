@@ -183,12 +183,3 @@ func (r *RSI) smooth(current float64, new float64) float64 {
 
 	return a*new + b*current
 }
-
-//
-// utils
-//
-
-func runningAvg(current float64, n int, new float64) float64 {
-	n64 := float64(n)
-	return (current*n64 + new) / (n64 + 1.0)
-}

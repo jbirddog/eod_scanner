@@ -28,8 +28,9 @@ var columns = []struct {
 }{
 	{"Symbol", "%s"},
 	{"Vol X", "%.2f"},
+	{"%", "%.2f%%"},
+	{"Close", "%.2f %.2f %.2f"},
 	{"RSI", "%.2f"},
-	{"Close", "%.2f %.2f%% %.2f %.2f %.2f %.2f"},
 	{"MACD", "%.2f %.2f"},
 	/*
 		{"Position", "%s"},
@@ -93,13 +94,11 @@ func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64)
 	fmt.Printf(m._recordFmt,
 		a.Symbol,
 		a.LastVolumeMultiplier(),
-		i.RSI.Value,
-		a.LastClose(),
 		a.LastChange(),
-		i.SMA20.Value,
+		a.LastClose(),
 		i.EMA8.Value,
-		i.EMA12.Value,
-		i.EMA26.Value,
+		i.SMA20.Value,
+		i.RSI.Value,
 		i.MACD.Line,
 		i.MACD.Signal.Value)
 	/*

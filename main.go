@@ -15,7 +15,7 @@ func main() {
 	marketDayCount := 65
 	strategies := []Strategy{
 		&MonthClimb{},
-		//&MonthFall{},
+		&MonthFall{},
 	}
 	writer := NewMarkdownWriter()
 
