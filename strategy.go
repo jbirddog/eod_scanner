@@ -26,12 +26,20 @@ func (s *MonthClimb) Name() string {
 
 func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 	i := a.Indicators
-	if i.AvgVolume < 1000000 || i.AvgClose < 5.0 ||
-		a.LastVolume() < i.AvgVolume ||
-		a.LastChange() < 0.0 ||
-		i.MACD.Gap() < 0.0 ||
-		i.RSI.Value < 50.0 ||
-		a.LastClose() < i.SMA20.Value {
+
+	if i.AvgVolume < 1000000 || a.LastVolume() < i.AvgVolume {
+		return false
+	}
+
+	if i.AvgClose < 5.0 || a.LastChange() < 0.0 || a.LastClose() < i.SMA20.Value {
+		return false
+	}
+
+	if i.RSI.Value < 50 || i.RSI.Lookback(5)+15.0 > i.RSI.Value {
+		return false
+	}
+
+	if i.MACD.Gap() < 0.0 {
 		return false
 	}
 
@@ -58,12 +66,20 @@ func (s *MonthFall) Name() string {
 
 func (s *MonthFall) SignalDetected(a *AnalyzedData) bool {
 	i := a.Indicators
-	if i.AvgVolume < 1000000 || i.AvgClose < 5.0 ||
-		a.LastVolume() < i.AvgVolume ||
-		a.LastChange() > 0.0 ||
-		i.MACD.Gap() > 0.0 ||
-		i.RSI.Value > 50.0 ||
-		a.LastClose() > i.SMA20.Value {
+
+	if i.AvgVolume < 1000000 || a.LastVolume() < i.AvgVolume {
+		return false
+	}
+
+	if i.AvgClose < 5.0 || a.LastChange() > 0.0 || a.LastClose() > i.SMA20.Value {
+		return false
+	}
+
+	if i.RSI.Value > 50 || i.RSI.Lookback(5)-15.0 < i.RSI.Value {
+		return false
+	}
+
+	if i.MACD.Gap() > 0.0 {
 		return false
 	}
 

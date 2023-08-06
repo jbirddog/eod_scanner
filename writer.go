@@ -30,7 +30,7 @@ var columns = []struct {
 	{"Vol X", "%.2f"},
 	{"%", "%.2f%%"},
 	{"Close", "%.2f %.2f%% %.2f%%"},
-	{"RSI", "%.2f"},
+	{"RSI", "%.2f %.2f%%"},
 	{"MACD", "%.2f %.2f"},
 	/*
 		{"Position", "%s"},
@@ -92,7 +92,7 @@ func (m *MarkdownWriter) WriteSectionHeader(r *ScanResult) {
 func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64) {
 	i := a.Indicators
 	lastClose := a.LastClose()
-	
+
 	fmt.Printf(m._recordFmt,
 		a.Symbol,
 		a.LastVolumeMultiplier(),
@@ -101,6 +101,7 @@ func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64)
 		percentage(lastClose, i.EMA8.Value),
 		percentage(lastClose, i.SMA20.Value),
 		i.RSI.Value,
+		percentage(i.RSI.Value, i.RSI.Lookback(5)),
 		i.MACD.Line,
 		i.MACD.Signal.Value)
 	/*
