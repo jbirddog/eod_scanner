@@ -101,7 +101,7 @@ func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64)
 		percentage(lastClose, i.EMA8.Value),
 		percentage(lastClose, i.SMA20.Value),
 		i.RSI.Value,
-		percentage(i.RSI.Value, i.RSI.Lookback(5)),
+		percentage(i.RSI.Value, i.RSI.Lookback.LossyValue(5)),
 		i.MACD.Line,
 		i.MACD.Signal.Value)
 	/*

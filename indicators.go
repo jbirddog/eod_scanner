@@ -138,7 +138,7 @@ type RSI struct {
 	AvgGain   float64
 	AvgLoss   float64
 	Value     float64
-	_lookback uint64
+	Lookback U8LossyLookback
 }
 
 func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
@@ -171,12 +171,7 @@ func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 	r.AvgLoss = r.smooth(r.AvgLoss, loss)
 	r.Value = 100.0 - (100.0 / (1.0 + (r.AvgGain / r.AvgLoss)))
 
-	r._lookback <<= 8
-	r._lookback |= uint64(r.Value)
-}
-
-func (r *RSI) Lookback(n int) float64 {
-	return float64((r._lookback >> (8 * n)) & 0xFF)
+	r.Lookback.Push(r.Value)
 }
 
 func (r *RSI) smooth(current float64, new float64) float64 {
