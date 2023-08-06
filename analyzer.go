@@ -25,11 +25,7 @@ func (a *AnalyzedData) LastChange() float64 {
 	close1 := a.EODData[days-1].Close
 	close2 := a.EODData[days-2].Close
 
-	if close2 < close1 {
-		return percentage(close1, close2)
-	}
-
-	return -percentage(close2, close1)
+	return percentage(close1, close2)
 }
 
 func (a *AnalyzedData) LastVolume() float64 {
