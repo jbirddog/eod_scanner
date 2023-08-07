@@ -41,3 +41,35 @@ func (u *U8LossyLookback) Push(value float64) {
 func (u *U8LossyLookback) LossyValue(n int) float64 {
 	return float64((u.values >> (n << 3)) & 0xFF)
 }
+
+func (u *U8LossyLookback) LossyMax() float64 {
+	return u.LossyMaxN(8)
+}
+
+func (u *U8LossyLookback) LossyMaxN(n int) float64 {
+	maxVal := 0.0
+
+	for i := 0; i < n; i++ {
+		if val := u.LossyValue(i); val > maxVal {
+			maxVal = val
+		}
+	}
+
+	return maxVal
+}
+
+func (u *U8LossyLookback) LossyMin() float64 {
+	return u.LossyMinN(8)
+}
+
+func (u *U8LossyLookback) LossyMinN(n int) float64 {
+	minVal := 255.0
+
+	for i := 0; i < n; i++ {
+		if val := u.LossyValue(i); val < minVal {
+			minVal = val
+		}
+	}
+
+	return minVal
+}

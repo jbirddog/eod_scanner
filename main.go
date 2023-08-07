@@ -11,7 +11,7 @@ func main() {
 		log.Fatal("Must set environment variable EOD_DATA_DIR")
 	}
 
-	currentDay := Day(2023, 8, 5)
+	currentDay := Day(2023, 8, 7)
 	marketDayCount := 65
 	strategies := []Strategy{
 		&MonthClimb{},

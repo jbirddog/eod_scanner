@@ -42,7 +42,7 @@ func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 		return false
 	}
 
-	if i.RSI.Value < 50 || i.RSI.Lookback.LossyValue(5)+15.0 > i.RSI.Value {
+	if i.RSI.Value < 50 || i.RSI.Lookback.LossyMinN(5)+15.0 > i.RSI.Value {
 		return false
 	}
 
@@ -82,7 +82,7 @@ func (s *MonthFall) SignalDetected(a *AnalyzedData) bool {
 		return false
 	}
 
-	if i.RSI.Value > 50 || i.RSI.Lookback.LossyValue(5)-15.0 < i.RSI.Value {
+	if i.RSI.Value > 50 || i.RSI.Lookback.LossyMaxN(5)-15.0 < i.RSI.Value {
 		return false
 	}
 

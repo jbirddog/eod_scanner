@@ -21,7 +21,7 @@ func sameData(a *EODData, b *EODData) bool {
 
 func TestU8LossyLookback(t *testing.T) {
 	l := &U8LossyLookback{}
-	values := []float64{124.3, 1.3, 3.3, 0.3, 55.3, 78.3, 81.3, 11.3, 44.4}
+	values := []float64{124.3, 1.3, 3.3, 20.3, 55.3, 78.3, 81.3, 11.3, 44.4}
 
 	for _, v := range values {
 		l.Push(v)
@@ -33,6 +33,38 @@ func TestU8LossyLookback(t *testing.T) {
 
 		if !sameFloat(actual, expected) {
 			t.Fatalf("Expected %f at %d, got %f\n", expected, i, actual)
+		}
+	}
+
+	{
+		actual := l.LossyMax()
+		expected := 81.0
+		if !sameFloat(actual, expected) {
+			t.Fatalf("Expected max %f, got %f\n", expected, actual)
+		}
+	}
+
+	{
+		actual := l.LossyMaxN(2)
+		expected := 44.0
+		if !sameFloat(actual, expected) {
+			t.Fatalf("Expected max %f, got %f\n", expected, actual)
+		}
+	}
+
+	{
+		actual := l.LossyMin()
+		expected := 1.0
+		if !sameFloat(actual, expected) {
+			t.Fatalf("Expected min %f, got %f\n", expected, actual)
+		}
+	}
+
+	{
+		actual := l.LossyMinN(5)
+		expected := 11.0
+		if !sameFloat(actual, expected) {
+			t.Fatalf("Expected min %f, got %f\n", expected, actual)
 		}
 	}
 }
