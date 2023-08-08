@@ -129,13 +129,12 @@ func (m *MACD) Gap() float64 {
 //
 
 type RSI struct {
-	Periods  int
-	Value    float64
-	avgGain  float64
-	avgLoss  float64
-	Lookback U8LossyLookback
-	prev     float64
-	ring     *ring.Ring
+	Periods int
+	Value   float64
+	avgGain float64
+	avgLoss float64
+	prev    float64
+	ring    *ring.Ring
 }
 
 func (r *RSI) Init(periods int, lookback int) {
@@ -172,7 +171,6 @@ func (r *RSI) Add(new float64, period int) {
 
 	r.ring.Value = r.Value
 	r.ring = r.ring.Next()
-	r.Lookback.Push(r.Value)
 }
 
 func (r *RSI) smooth(current float64, new float64) float64 {
