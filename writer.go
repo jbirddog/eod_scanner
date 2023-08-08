@@ -30,7 +30,7 @@ var columns = []struct {
 	{"Vol X", "%.2f"},
 	{"%", "%.2f%%"},
 	{"Close", "%.2f %.2f%% %.2f%%"},
-	{"RSI", "%.2f %.2f%%"},
+	{"RSI", "%.2f"},
 	{"MACD", "%.2f %.2f"},
 	{"Position", "%s %d @ %.2f %.2f %.2f"},
 }
@@ -95,7 +95,6 @@ func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64)
 		percentage(lastClose, i.EMA8.Value),
 		percentage(lastClose, i.SMA20.Value),
 		i.RSI.Value,
-		percentage(i.RSI.Value, i.RSI.Lookback.LossyValue(5)),
 		i.MACD.Line,
 		i.MACD.Signal.Value,
 		p.Type.String(),
