@@ -28,14 +28,16 @@ func (i *Indicators) Init() {
 
 func (i *Indicators) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
 	i.AvgVolume = runningAvg(i.AvgVolume, period, new.Volume)
-	i.AvgClose = runningAvg(i.AvgClose, period, new.Close)
 
-	i.EMA8.Add(new, previous, period, totalPeriods)
-	i.EMA12.Add(new, previous, period, totalPeriods)
-	i.EMA26.Add(new, previous, period, totalPeriods)
-	i.SMA20.Add(new, previous, period)
+	close := new.Close
+	i.AvgClose = runningAvg(i.AvgClose, period, close)
+
+	i.EMA8.Add(close, period)
+	i.EMA12.Add(close, period)
+	i.EMA26.Add(close, period)
+	i.SMA20.Add(close)
 	i.RSI.Add(new, previous, period, totalPeriods)
-	i.MACD.Add(new, previous, period, totalPeriods)
+	i.MACD.UpdateSignal(period)
 }
 
 //
@@ -54,15 +56,16 @@ func (s *SMA) Init(periods int) {
 	s.ring = ring.New(periods)
 }
 
-func (s *SMA) Add(new *EODData, previous []*EODData, period int) {
-	s.cumulative += new.Close
+func (s *SMA) Add(new float64) {
+	s.cumulative += new
 
 	if s.ring.Value != nil {
 		s.cumulative -= s.ring.Value.(float64)
 	}
 
-	s.ring.Value = new.Close
+	s.ring.Value = new
 	s.ring = s.ring.Next()
+
 	s.Value = s.cumulative / float64(s.Periods)
 }
 
@@ -83,17 +86,13 @@ func (e *EMA) Init(periods int) {
 	e.sma.Init(periods)
 }
 
-func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
+func (e *EMA) Add(new float64, period int) {
 	if period < e.Periods {
-		e.sma.Add(new, previous, period)
+		e.sma.Add(new)
 		e.Value = e.sma.Value
 		return
 	}
 
-	e.AddPoint(new.Close)
-}
-
-func (e *EMA) AddPoint(new float64) {
 	e.Value = ((new - e.Value) * e.weight) + e.Value
 }
 
@@ -102,11 +101,10 @@ func (e *EMA) AddPoint(new float64) {
 //
 
 type MACD struct {
-	Line            float64
-	Signal          EMA
-	PositivePeriods uint64
-	fast            *EMA
-	slow            *EMA
+	Line   float64
+	Signal EMA
+	fast   *EMA
+	slow   *EMA
 }
 
 func (m *MACD) Init(fast *EMA, slow *EMA, signalPeriods int) {
@@ -115,21 +113,10 @@ func (m *MACD) Init(fast *EMA, slow *EMA, signalPeriods int) {
 	m.Signal.Init(signalPeriods)
 }
 
-func (m *MACD) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
+func (m *MACD) UpdateSignal(period int) {
 	m.Line = m.fast.Value - m.slow.Value
 
-	if period < m.Signal.Periods {
-		m.Signal.Value = m.Line
-		return
-	}
-
-	m.Signal.AddPoint(m.Line)
-
-	m.PositivePeriods <<= 1
-
-	if m.Line > m.Signal.Value {
-		m.PositivePeriods |= 1
-	}
+	m.Signal.Add(m.Line, period)
 }
 
 func (m *MACD) Gap() float64 {
