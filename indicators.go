@@ -22,11 +22,11 @@ func (i *Indicators) Init() {
 	i.EMA12.Init(12)
 	i.EMA26.Init(26)
 	i.SMA20.Init(20)
-	i.RSI.Periods = 14
+	i.RSI.Init(14, 8)
 	i.MACD.Init(&i.EMA12, &i.EMA26, 9)
 }
 
-func (i *Indicators) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
+func (i *Indicators) Add(new *EODData, period int) {
 	i.AvgVolume = runningAvg(i.AvgVolume, period, new.Volume)
 
 	close := new.Close
@@ -36,7 +36,7 @@ func (i *Indicators) Add(new *EODData, previous []*EODData, period int, totalPer
 	i.EMA12.Add(close, period)
 	i.EMA26.Add(close, period)
 	i.SMA20.Add(close)
-	i.RSI.Add(new, previous, period, totalPeriods)
+	i.RSI.Add(close, period)
 	i.MACD.UpdateSignal(period)
 }
 
@@ -129,41 +129,46 @@ func (m *MACD) Gap() float64 {
 
 type RSI struct {
 	Periods  int
-	AvgGain  float64
-	AvgLoss  float64
 	Value    float64
+	avgGain  float64
+	avgLoss  float64
 	Lookback U8LossyLookback
+	ring     *ring.Ring
 }
 
-func (r *RSI) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
-	if period == 0 {
+func (r *RSI) Init(periods int, lookback int) {
+	r.Periods = periods
+	r.ring = ring.New(lookback)
+}
+
+func (r *RSI) Add(new float64, period int) {
+	if r.ring.Value == nil {
+		r.ring.Value = new
 		return
 	}
 
-	prevClose := 0.0
-
-	if lookBack := previous[period-1]; lookBack != nil {
-		prevClose = lookBack.Close
-	}
+	prev := r.ring.Value.(float64)
+	r.ring = r.ring.Next()
+	r.ring.Value = new
 
 	gain := 0.0
 	loss := 0.0
 
-	if prevClose < new.Close {
-		gain = new.Close - prevClose
+	if prev < new {
+		gain = new - prev
 	} else {
-		loss = prevClose - new.Close
+		loss = prev - new
 	}
 
 	if period <= r.Periods+1 {
-		r.AvgGain = runningAvg(r.AvgGain, period-1, gain)
-		r.AvgLoss = runningAvg(r.AvgLoss, period-1, loss)
+		r.avgGain = runningAvg(r.avgGain, period-1, gain)
+		r.avgLoss = runningAvg(r.avgLoss, period-1, loss)
 		return
 	}
 
-	r.AvgGain = r.smooth(r.AvgGain, gain)
-	r.AvgLoss = r.smooth(r.AvgLoss, loss)
-	r.Value = 100.0 - (100.0 / (1.0 + (r.AvgGain / r.AvgLoss)))
+	r.avgGain = r.smooth(r.avgGain, gain)
+	r.avgLoss = r.smooth(r.avgLoss, loss)
+	r.Value = 100.0 - (100.0 / (1.0 + (r.avgGain / r.avgLoss)))
 
 	r.Lookback.Push(r.Value)
 }

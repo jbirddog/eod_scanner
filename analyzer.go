@@ -63,15 +63,15 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 	for i, dailyData := range eodData {
 		for _, record := range dailyData {
 			data := analyzedDataForSymbol(record.Symbol)
-			addEODData(data, record, i, days)
+			addEODData(data, record, i)
 		}
 	}
 
 	return analyzed
 }
 
-func addEODData(data *AnalyzedData, record *EODData, day int, days int) {
-	data.Indicators.Add(record, data.EODData, day, days)
+func addEODData(data *AnalyzedData, record *EODData, day int) {
+	data.Indicators.Add(record, day)
 	data.EODData[day] = record
 	data.DataPoints += 1
 }
