@@ -1,5 +1,9 @@
 package main
 
+import (
+	"container/ring"
+)
+
 // TODO: need to add some tests for these indicators
 
 type Indicators struct {
@@ -17,7 +21,7 @@ func (i *Indicators) Init() {
 	i.EMA8.Init(8)
 	i.EMA12.Init(12)
 	i.EMA26.Init(26)
-	i.SMA20.Periods = 20
+	i.SMA20.Init(20)
 	i.RSI.Periods = 14
 	i.MACD.Init(&i.EMA12, &i.EMA26, 9)
 }
@@ -40,23 +44,26 @@ func (i *Indicators) Add(new *EODData, previous []*EODData, period int, totalPer
 
 type SMA struct {
 	Periods    int
-	Cumulative float64
 	Value      float64
+	cumulative float64
+	ring       *ring.Ring
+}
+
+func (s *SMA) Init(periods int) {
+	s.Periods = periods
+	s.ring = ring.New(periods)
 }
 
 func (s *SMA) Add(new *EODData, previous []*EODData, period int) {
-	s.Cumulative += new.Close
+	s.cumulative += new.Close
 
-	if period < s.Periods {
-		s.Value = s.Cumulative / float64(period+1)
-		return
+	if s.ring.Value != nil {
+		s.cumulative -= s.ring.Value.(float64)
 	}
 
-	if lookBack := previous[period-s.Periods]; lookBack != nil {
-		s.Cumulative -= lookBack.Close
-	}
-
-	s.Value = s.Cumulative / float64(s.Periods)
+	s.ring.Value = new.Close
+	s.ring = s.ring.Next()
+	s.Value = s.cumulative / float64(s.Periods)
 }
 
 //
@@ -65,15 +72,15 @@ func (s *SMA) Add(new *EODData, previous []*EODData, period int) {
 
 type EMA struct {
 	Periods int
-	Weight  float64
 	Value   float64
+	weight  float64
 	sma     SMA
 }
 
 func (e *EMA) Init(periods int) {
 	e.Periods = periods
-	e.Weight = 2.0 / (1.0 + float64(periods))
-	e.sma.Periods = periods
+	e.weight = 2.0 / (1.0 + float64(periods))
+	e.sma.Init(periods)
 }
 
 func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods int) {
@@ -87,7 +94,7 @@ func (e *EMA) Add(new *EODData, previous []*EODData, period int, totalPeriods in
 }
 
 func (e *EMA) AddPoint(new float64) {
-	e.Value = ((new - e.Value) * e.Weight) + e.Value
+	e.Value = ((new - e.Value) * e.weight) + e.Value
 }
 
 //
