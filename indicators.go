@@ -2,6 +2,7 @@ package main
 
 import (
 	"container/ring"
+	"math"
 )
 
 // TODO: need to add some tests for these indicators
@@ -22,7 +23,7 @@ func (i *Indicators) Init() {
 	i.EMA12.Init(12)
 	i.EMA26.Init(26)
 	i.SMA20.Init(20)
-	i.RSI.Init(14, 8)
+	i.RSI.Init(14, 5)
 	i.MACD.Init(&i.EMA12, &i.EMA26, 9)
 }
 
@@ -133,6 +134,7 @@ type RSI struct {
 	avgGain  float64
 	avgLoss  float64
 	Lookback U8LossyLookback
+	prev     float64
 	ring     *ring.Ring
 }
 
@@ -142,23 +144,21 @@ func (r *RSI) Init(periods int, lookback int) {
 }
 
 func (r *RSI) Add(new float64, period int) {
-	if r.ring.Value == nil {
-		r.ring.Value = new
+	if period == 0 {
+		r.prev = new
 		return
 	}
-
-	prev := r.ring.Value.(float64)
-	r.ring = r.ring.Next()
-	r.ring.Value = new
 
 	gain := 0.0
 	loss := 0.0
 
-	if prev < new {
-		gain = new - prev
+	if r.prev < new {
+		gain = new - r.prev
 	} else {
-		loss = prev - new
+		loss = r.prev - new
 	}
+
+	r.prev = new
 
 	if period <= r.Periods+1 {
 		r.avgGain = runningAvg(r.avgGain, period-1, gain)
@@ -170,6 +170,8 @@ func (r *RSI) Add(new float64, period int) {
 	r.avgLoss = r.smooth(r.avgLoss, loss)
 	r.Value = 100.0 - (100.0 / (1.0 + (r.avgGain / r.avgLoss)))
 
+	r.ring.Value = r.Value
+	r.ring = r.ring.Next()
 	r.Lookback.Push(r.Value)
 }
 
@@ -179,4 +181,28 @@ func (r *RSI) smooth(current float64, new float64) float64 {
 	b := (periods - 1.0) / periods
 
 	return a*new + b*current
+}
+
+func (r *RSI) LookbackMax() float64 {
+	max := math.Inf(-1)
+
+	r.ring.Do(func(val any) {
+		if val != nil {
+			max = math.Max(max, val.(float64))
+		}
+	})
+
+	return max
+}
+
+func (r *RSI) LookbackMin() float64 {
+	min := math.Inf(1)
+
+	r.ring.Do(func(val any) {
+		if val != nil {
+			min = math.Min(min, val.(float64))
+		}
+	})
+
+	return min
 }
