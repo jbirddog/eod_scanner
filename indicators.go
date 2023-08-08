@@ -37,7 +37,7 @@ func (i *Indicators) Add(new *EODData, period int) {
 	i.EMA26.Add(close, period)
 	i.SMA20.Add(close)
 	i.RSI.Add(close, period)
-	i.MACD.UpdateSignal(period)
+	i.MACD.Update(period)
 }
 
 //
@@ -113,7 +113,7 @@ func (m *MACD) Init(fast *EMA, slow *EMA, signalPeriods int) {
 	m.Signal.Init(signalPeriods)
 }
 
-func (m *MACD) UpdateSignal(period int) {
+func (m *MACD) Update(period int) {
 	m.Line = m.fast.Value - m.slow.Value
 
 	m.Signal.Add(m.Line, period)
