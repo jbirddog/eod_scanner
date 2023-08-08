@@ -37,8 +37,7 @@ func Scan(currentDay time.Time, marketDayCount int, dataDir string, strategies [
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, marketDayCount)
 
-	for i := len(dates) - 1; i >= 0; i-- {
-		date := dates[i]
+	for i, date := range dates {
 		rawData, err := LoadEODFile(dataDir, exchange, date)
 		if err != nil {
 			return nil, err
