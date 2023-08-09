@@ -17,36 +17,26 @@ type EODData struct {
 	Volume float64
 }
 
-type ParsedEODData struct {
-	data [][]*EODData
-	err  error
-}
-
 const header = "Symbol,Date,Open,High,Low,Close,Volume"
 
-func ParseEODFiles(dataDir string, exchange string, dates []time.Time) ParsedEODData {
+func ParseEODFiles(dataDir string, exchange string, dates []time.Time) ([][]*EODData, error) {
 	eodData := make([][]*EODData, len(dates))
-	var err error
 
 	for i, date := range dates {
 		rawData, err := LoadEODFile(dataDir, exchange, date)
 		if err != nil {
-			break
+			return nil, err
 		}
 
 		data, err := ParseEODFileContents(rawData)
 		if err != nil {
-			break
+			return nil, err
 		}
 
 		eodData[i] = data
 	}
 
-	if err != nil {
-		return ParsedEODData{err: err}
-	}
-
-	return ParsedEODData{data: eodData}
+	return eodData, nil
 }
 
 func ParseEODFileContents(rawData []string) ([]*EODData, error) {

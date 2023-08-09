@@ -30,9 +30,14 @@ func (s *ScanResult) Sort() {
 
 }
 
-func parse(dataDir string, exchange string, dates []time.Time, c chan ParsedEODData) {
-	result := ParseEODFiles(dataDir, exchange, dates)
-	c <- result
+type parsedEODData struct {
+	data [][]*EODData
+	err  error
+}
+
+func parse(dataDir string, exchange string, dates []time.Time, c chan parsedEODData) {
+	data, err := ParseEODFiles(dataDir, exchange, dates)
+	c <- parsedEODData{data: data, err: err}
 }
 
 func Scan(currentDay time.Time, marketDayCount int, dataDir string, strategies []Strategy) ([]*ScanResult, error) {
@@ -41,7 +46,7 @@ func Scan(currentDay time.Time, marketDayCount int, dataDir string, strategies [
 	exchange := "NASDAQ"
 	eodData := make([][]*EODData, 0, marketDayCount)
 	dateBatches := batch(dates)
-	parseChan := make(chan ParsedEODData, len(dateBatches))
+	parseChan := make(chan parsedEODData, len(dateBatches))
 
 	for _, dateBatch := range dateBatches {
 		go parse(dataDir, exchange, dateBatch, parseChan)
