@@ -11,6 +11,15 @@ type AnalyzedData struct {
 	Indicators Indicators
 }
 
+func NewAnalyzedData(symbol string, days int) *AnalyzedData {
+	data := &AnalyzedData{
+		Symbol:  symbol,
+		EODData: make([]*EODData, days),
+	}
+	data.Indicators.Init()
+	return data
+}
+
 func (a *AnalyzedData) LastClose() float64 {
 	return a.EODData[len(a.EODData)-1].Close
 }
@@ -42,27 +51,18 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 	analyzed := make(AnalyzedDataBySymbol)
 	days := len(eodData)
 
-	// TODO: move init in !found to New function or similar, inline the closure
-	analyzedDataForSymbol := func(symbol string) *AnalyzedData {
-		data, found := analyzed[symbol]
-		if !found {
-			data = &AnalyzedData{
-				Symbol:  symbol,
-				EODData: make([]*EODData, days),
-			}
-			data.Indicators.Init()
-			analyzed[symbol] = data
-		}
-		return data
-	}
-
 	sort.Slice(eodData, func(i, j int) bool {
 		return eodData[i][0].Date.Before(eodData[j][0].Date)
 	})
 
 	for i, dailyData := range eodData {
 		for _, record := range dailyData {
-			data := analyzedDataForSymbol(record.Symbol)
+			symbol := record.Symbol
+			data, found := analyzed[symbol]
+			if !found {
+				data = NewAnalyzedData(symbol, days)
+				analyzed[symbol] = data
+			}
 			addEODData(data, record, i)
 		}
 	}

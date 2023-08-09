@@ -138,7 +138,7 @@ func TestParseMinimalEODFile(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		actual, err := ParseEODFile(c.rawData)
+		actual, err := ParseEODFileContents(c.rawData)
 
 		if actual == nil {
 			if c.expected != nil {

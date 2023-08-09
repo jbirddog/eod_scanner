@@ -19,7 +19,27 @@ type EODData struct {
 
 const header = "Symbol,Date,Open,High,Low,Close,Volume"
 
-func ParseEODFile(rawData []string) ([]*EODData, error) {
+func ParseEODFiles(dataDir string, exchange string, dates []time.Time) ([][]*EODData, error) {
+	eodData := make([][]*EODData, len(dates))
+
+	for i, date := range dates {
+		rawData, err := LoadEODFile(dataDir, exchange, date)
+		if err != nil {
+			return nil, err
+		}
+
+		data, err := ParseEODFileContents(rawData)
+		if err != nil {
+			return nil, err
+		}
+
+		eodData[i] = data
+	}
+
+	return eodData, nil
+}
+
+func ParseEODFileContents(rawData []string) ([]*EODData, error) {
 	if len(rawData) == 0 || rawData[0] != header {
 		return nil, errors.New("Expected header as first line")
 	}

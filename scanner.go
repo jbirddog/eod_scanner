@@ -30,26 +30,34 @@ func (s *ScanResult) Sort() {
 
 }
 
+type parsedEODData struct {
+	data [][]*EODData
+	err  error
+}
+
+func parse(dataDir string, exchange string, dates []time.Time, c chan parsedEODData) {
+	data, err := ParseEODFiles(dataDir, exchange, dates)
+	c <- parsedEODData{data: data, err: err}
+}
+
 func Scan(currentDay time.Time, marketDayCount int, dataDir string, strategies []Strategy) ([]*ScanResult, error) {
-	// TODO: use channels?
 	dates := PreviousMarketDays(currentDay, marketDayCount)
 	// TODO: AMEX, NYSE
 	exchange := "NASDAQ"
-	eodData := make([][]*EODData, marketDayCount)
+	eodData := make([][]*EODData, 0, marketDayCount)
+	dateBatches := batch(dates)
+	parseChan := make(chan parsedEODData, len(dateBatches))
 
-	for i := len(dates) - 1; i >= 0; i-- {
-		date := dates[i]
-		rawData, err := LoadEODFile(dataDir, exchange, date)
-		if err != nil {
-			return nil, err
+	for _, dateBatch := range dateBatches {
+		go parse(dataDir, exchange, dateBatch, parseChan)
+	}
+
+	for i := 0; i < len(dateBatches); i++ {
+		result := <-parseChan
+		if result.err != nil {
+			return nil, result.err
 		}
-
-		data, err := ParseEODFile(rawData)
-		if err != nil {
-			return nil, err
-		}
-
-		eodData[i] = data
+		eodData = append(eodData, result.data...)
 	}
 
 	analyzedDataBySymbol := Analyze(eodData)
