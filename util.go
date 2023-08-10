@@ -23,22 +23,6 @@ func batch[T any](elems []T) [][]T {
 	return batches
 }
 
-func max(a float64, b float64) float64 {
-	if a > b {
-		return a
-	}
-
-	return b
-}
-
-func min(a float64, b float64) float64 {
-	if a < b {
-		return a
-	}
-
-	return b
-}
-
 func percentage(a float64, b float64) float64 {
 	if b < a {
 		return ((a - b) / a) * 100.0
