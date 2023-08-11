@@ -102,26 +102,27 @@ func (e *EMA) Add(new float64, period int) {
 //
 
 type MACD struct {
-	Line   float64
-	Signal EMA
-	fast   *EMA
-	slow   *EMA
+	Line    float64
+	Signal  EMA
+	Gap     float64
+	GapSMA5 SMA
+	fast    *EMA
+	slow    *EMA
 }
 
 func (m *MACD) Init(fast *EMA, slow *EMA, signalPeriods int) {
 	m.fast = fast
 	m.slow = slow
 	m.Signal.Init(signalPeriods)
+	m.GapSMA5.Init(5)
 }
 
 func (m *MACD) Update(period int) {
 	m.Line = m.fast.Value - m.slow.Value
 
 	m.Signal.Add(m.Line, period)
-}
-
-func (m *MACD) Gap() float64 {
-	return m.Line - m.Signal.Value
+	m.Gap = m.Line - m.Signal.Value
+	m.GapSMA5.Add(m.Gap)
 }
 
 //
@@ -203,4 +204,14 @@ func (r *RSI) LookbackMin() float64 {
 	})
 
 	return min
+}
+
+func (r *RSI) Rising() bool {
+	lookback := r.ring.Next()
+	return lookback != nil && lookback.Value.(float64) < r.Value
+}
+
+func (r *RSI) Falling() bool {
+	lookback := r.ring.Next()
+	return lookback != nil && lookback.Value.(float64) > r.Value
 }

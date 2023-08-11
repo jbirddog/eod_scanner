@@ -1,5 +1,9 @@
 package main
 
+import (
+	"math"
+)
+
 type SignalType int
 
 const (
@@ -18,7 +22,7 @@ func hasLowVolumeOrPrice(a *AnalyzedData) bool {
 	avgClose := a.Indicators.AvgClose
 	avgVol := a.Indicators.AvgVolume
 
-	return avgVol < 1000000 || a.LastVolume() < avgVol || avgClose < 5.0
+	return avgVol < 1000000 || avgClose < 5.0
 }
 
 //
@@ -34,7 +38,7 @@ func (s *MonthClimb) Name() string {
 func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 	i := a.Indicators
 
-	if hasLowVolumeOrPrice(a) {
+	if hasLowVolumeOrPrice(a) || a.LastVolume() < i.AvgVolume {
 		return false
 	}
 
@@ -46,7 +50,7 @@ func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 		return false
 	}
 
-	if i.MACD.Gap() < 0.0 {
+	if i.MACD.Gap < 0.0 {
 		return false
 	}
 
@@ -74,7 +78,7 @@ func (s *MonthFall) Name() string {
 func (s *MonthFall) SignalDetected(a *AnalyzedData) bool {
 	i := a.Indicators
 
-	if hasLowVolumeOrPrice(a) {
+	if hasLowVolumeOrPrice(a) || a.LastVolume() < i.AvgVolume {
 		return false
 	}
 
@@ -86,7 +90,7 @@ func (s *MonthFall) SignalDetected(a *AnalyzedData) bool {
 		return false
 	}
 
-	if i.MACD.Gap() > 0.0 {
+	if i.MACD.Gap > 0.0 {
 		return false
 	}
 
@@ -99,4 +103,47 @@ func (s *MonthFall) SignalType() SignalType {
 
 func (s *MonthFall) SortWeight(a *AnalyzedData) float64 {
 	return a.Indicators.MACD.Line
+}
+
+//
+// MACD Fuse
+//
+
+type MACDFuse struct{}
+
+func (s *MACDFuse) Name() string {
+	return "MACD Fuse"
+}
+
+func (s *MACDFuse) SignalDetected(a *AnalyzedData) bool {
+	if hasLowVolumeOrPrice(a) {
+		return false
+	}
+
+	macd := a.Indicators.MACD
+	rsi := a.Indicators.RSI
+
+	gap := math.Abs(macd.Gap)
+	gapSMA5 := math.Abs(macd.GapSMA5.Value)
+
+	if a.Symbol != "AZTA" { //return false
+	}
+
+	if gapSMA5 > 0.01 || gap < gapSMA5*5.0 {
+		return false
+	}
+
+	if !rsi.Rising() {
+		return false
+	}
+
+	return true
+}
+
+func (s *MACDFuse) SignalType() SignalType {
+	return Buy
+}
+
+func (s *MACDFuse) SortWeight(a *AnalyzedData) float64 {
+	return a.Indicators.MACD.Gap
 }
