@@ -17,3 +17,24 @@ func sameData(a *EODData, b *EODData) bool {
 		sameFloat(a.Close, b.Close) &&
 		a.Volume == b.Volume
 }
+
+func setRSIs(i *Indicators, a, b, c, d, e float64) {
+	r := i.RSI.ring
+
+	r.Value = a
+	r = r.Next()
+
+	r.Value = b
+	r = r.Next()
+
+	r.Value = c
+	r = r.Next()
+
+	r.Value = d
+	r = r.Next()
+
+	r.Value = e
+	r = r.Next()
+
+	i.RSI.Value = e
+}

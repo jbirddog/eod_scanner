@@ -5,27 +5,6 @@ import (
 )
 
 // TODO: move these to own file once a few are built out
-func setRSIs(i *Indicators, a, b, c, d, e float64) {
-	r := i.RSI.ring
-
-	r.Value = a
-	r = r.Next()
-
-	r.Value = b
-	r = r.Next()
-
-	r.Value = c
-	r = r.Next()
-
-	r.Value = d
-	r = r.Next()
-
-	r.Value = e
-	r = r.Next()
-
-	i.RSI.Value = e
-}
-
 func CRDO_05152023() *AnalyzedData {
 	d := &AnalyzedData{Symbol: "CRDO"}
 
@@ -66,12 +45,61 @@ func CRDO_05152023() *AnalyzedData {
 	return d
 }
 
-func Test_CRDO_05152023(t *testing.T) {
-	strategy := &MonthClimb{}
-	data := CRDO_05152023()
-	signaled := strategy.SignalDetected(data)
+func RIOT_01052023() *AnalyzedData {
+	d := &AnalyzedData{Symbol: "RIOT"}
 
-	if !signaled {
-		t.Fatalf("Expected '%s' signal for CRDO on 05/15/2023", strategy.Name())
+	d.EODData = []*EODData{
+		&EODData{
+			Symbol: "RIOT",
+			Date:   Day(2023, 1, 4),
+			Open:   3.44,
+			High:   3.95,
+			Low:    3.38,
+			Close:  3.88,
+			Volume: 12325300.0,
+		},
+		&EODData{
+			Symbol: "RIOT",
+			Date:   Day(2023, 1, 5),
+			Open:   3.86,
+			High:   4.28,
+			Low:    3.70,
+			Close:  4.22,
+			Volume: 14097000.0,
+		},
+	}
+
+	i := &d.Indicators
+	i.Init()
+
+	i.AvgVolume = 1000001.0
+	i.AvgClose = 5.01
+
+	i.MACD.Line = -0.2691
+	i.MACD.Signal.Value = -0.3502
+
+	setRSIs(i, 31.64, 31.17, 30.84, 46.35, 53.79)
+
+	i.SMA20.Value = 3.85
+
+	return d
+}
+
+func TestMonthClimb(t *testing.T) {
+	strategy := &MonthClimb{}
+	cases := []*AnalyzedData{
+		CRDO_05152023(),
+		RIOT_01052023(),
+	}
+
+	for i, data := range cases {
+		signaled := strategy.SignalDetected(data)
+
+		if !signaled {
+			t.Fatalf("Expected signal in case %d for %s on %s",
+			i,
+			data.Symbol,
+			data.LastDate().Format("01/02/2006"))
+		}
 	}
 }
