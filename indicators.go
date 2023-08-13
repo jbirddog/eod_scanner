@@ -104,7 +104,6 @@ func (e *EMA) Add(new float64, period int) {
 type MACD struct {
 	Line    float64
 	Signal  EMA
-	Gap     float64
 	GapSMA5 SMA
 	fast    *EMA
 	slow    *EMA
@@ -121,8 +120,11 @@ func (m *MACD) Update(period int) {
 	m.Line = m.fast.Value - m.slow.Value
 
 	m.Signal.Add(m.Line, period)
-	m.Gap = m.Line - m.Signal.Value
-	m.GapSMA5.Add(m.Gap)
+	m.GapSMA5.Add(m.Gap())
+}
+
+func (m *MACD) Gap() float64 {
+	return m.Line - m.Signal.Value
 }
 
 //

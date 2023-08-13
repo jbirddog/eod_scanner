@@ -19,10 +19,9 @@ type Strategy interface {
 }
 
 func hasLowVolumeOrPrice(a *AnalyzedData) bool {
-	avgClose := a.Indicators.AvgClose
-	avgVol := a.Indicators.AvgVolume
+	i := a.Indicators
 
-	return avgVol < 1000000 || avgClose < 5.0
+	return i.AvgVolume < 1000000 || i.AvgClose < 5.0
 }
 
 //
@@ -38,6 +37,10 @@ func (s *MonthClimb) Name() string {
 func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 	i := a.Indicators
 
+	// TODO: for the strategies, avgVolume makes it hard to test historic scenarios
+	// since there is no way to tell the avg volume at that time
+	// shift to comparison to previous volume(s)?
+
 	if hasLowVolumeOrPrice(a) || a.LastVolume() < i.AvgVolume {
 		return false
 	}
@@ -50,7 +53,7 @@ func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 		return false
 	}
 
-	if i.MACD.Gap < 0.0 {
+	if i.MACD.Gap() >= 0.0 {
 		return false
 	}
 
@@ -90,7 +93,7 @@ func (s *MonthFall) SignalDetected(a *AnalyzedData) bool {
 		return false
 	}
 
-	if i.MACD.Gap > 0.0 {
+	if i.MACD.Gap() >= 0.0 {
 		return false
 	}
 
@@ -123,7 +126,7 @@ func (s *MACDFuse) SignalDetected(a *AnalyzedData) bool {
 	macd := a.Indicators.MACD
 	rsi := a.Indicators.RSI
 
-	gap := math.Abs(macd.Gap)
+	gap := math.Abs(macd.Gap())
 	gapSMA5 := math.Abs(macd.GapSMA5.Value)
 
 	if gapSMA5 > 0.1 || gap < gapSMA5*5.0 {
