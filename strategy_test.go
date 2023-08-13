@@ -63,6 +63,15 @@ func CRDO_05152023() *AnalyzedData {
 		8.09)
 }
 
+func GRPN_02062023() *AnalyzedData {
+	return tc1("GRPN",
+		Day(2023, 2, 3), 9.08, 9.27, 8.73, 8.78, 508644.0,
+		Day(2023, 2, 6), 8.61, 8.69, 8.11, 8.13, 795608.0,
+		0.1932, 0.2142,
+		50.19, 55.46, 61.28, 54.26, 47.57,
+		8.47)
+}
+
 func GRPN_06282023() *AnalyzedData {
 	return tc1("GRPN",
 		Day(2023, 6, 27), 5.21, 5.73, 5.10, 5.56, 1205454.0,
@@ -126,6 +135,7 @@ func TestStrategies(t *testing.T) {
 		{
 			s: &MonthFall{},
 			tf: []testCaseGen{
+				GRPN_02062023,
 				RIVN_12062022,
 			},
 		},
