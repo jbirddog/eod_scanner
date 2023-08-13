@@ -53,7 +53,7 @@ func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 		return false
 	}
 
-	if i.MACD.Gap() >= 0.0 {
+	if i.MACD.Gap() <= 0.0 {
 		return false
 	}
 

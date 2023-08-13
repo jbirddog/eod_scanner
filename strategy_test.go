@@ -71,8 +71,6 @@ func Test_CRDO_05152023(t *testing.T) {
 	data := CRDO_05152023()
 	signaled := strategy.SignalDetected(data)
 
-	t.Logf("MACD gap: %f\n", data.Indicators.MACD.Gap())
-
 	if !signaled {
 		t.Fatalf("Expected '%s' signal for CRDO on 05/15/2023", strategy.Name())
 	}
