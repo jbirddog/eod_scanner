@@ -88,6 +88,15 @@ func GRPN_06282023() *AnalyzedData {
 		5.31)
 }
 
+func RIVN_06292023() *AnalyzedData {
+	return sc1("RIVN",
+		Day(2023, 6, 28), 13.90, 14.87, 13.82, 14.64, 32296426.0,
+		Day(2023, 6, 29), 14.74, 16.01, 14.61, 16.01, 48833726.0,
+		0.1716, 0.1408,
+		43.35, 42.78, 47.36, 53.12, 61.91,
+		14.49)
+}
+
 func TestMonthClimb(t *testing.T) {
 	strategy := &MonthClimb{}
 	cases := []*AnalyzedData{
@@ -95,6 +104,7 @@ func TestMonthClimb(t *testing.T) {
 		RIOT_01052023(),
 		RIOT_06272023(),
 		GRPN_06282023(),
+		RIVN_06292023(),
 	}
 
 	for i, data := range cases {
