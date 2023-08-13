@@ -6,7 +6,7 @@ import (
 )
 
 // TODO: move these to own file once a few are built out
-func sc1(sym string,
+func tc1(sym string,
 	d1 time.Time, o1, h1, l1, c1, v1 float64,
 	d2 time.Time, o2, h2, l2, c2, v2 float64,
 	ml, ms float64,
@@ -52,8 +52,10 @@ func sc1(sym string,
 	return d
 }
 
+type testCaseGen func() *AnalyzedData
+
 func CRDO_05152023() *AnalyzedData {
-	return sc1("CRDO",
+	return tc1("CRDO",
 		Day(2023, 5, 12), 7.95, 8.06, 7.82, 7.91, 537400.0,
 		Day(2023, 5, 15), 7.99, 8.64, 7.96, 8.61, 1463100.0,
 		-0.2746, -0.3848,
@@ -61,8 +63,17 @@ func CRDO_05152023() *AnalyzedData {
 		8.09)
 }
 
+func GRPN_06282023() *AnalyzedData {
+	return tc1("GRPN",
+		Day(2023, 6, 27), 5.21, 5.73, 5.10, 5.56, 1205454.0,
+		Day(2023, 6, 28), 5.60, 6.00, 5.49, 5.93, 1152836.0,
+		0.2382, 0.2085,
+		57.21, 57.61, 54.05, 57.63, 61.28,
+		5.31)
+}
+
 func RIOT_01052023() *AnalyzedData {
-	return sc1("RIOT",
+	return tc1("RIOT",
 		Day(2023, 1, 4), 3.44, 3.95, 3.38, 3.88, 12325300.0,
 		Day(2023, 1, 5), 3.86, 4.28, 3.70, 4.22, 14097000.0,
 		-0.2691, -0.3502,
@@ -71,7 +82,7 @@ func RIOT_01052023() *AnalyzedData {
 }
 
 func RIOT_06272023() *AnalyzedData {
-	return sc1("RIOT",
+	return tc1("RIOT",
 		Day(2023, 6, 26), 11.49, 12.18, 10.72, 10.77, 22037414.0,
 		Day(2023, 6, 27), 11.07, 11.71, 10.88, 11.65, 25685628.0,
 		0.0572, -0.0364,
@@ -79,17 +90,17 @@ func RIOT_06272023() *AnalyzedData {
 		11.01)
 }
 
-func GRPN_06282023() *AnalyzedData {
-	return sc1("GRPN",
-		Day(2023, 6, 27), 5.21, 5.73, 5.10, 5.56, 1205454.0,
-		Day(2023, 6, 28), 5.60, 6.00, 5.49, 5.93, 1152836.0,
-		0.2382, 0.2085,
-		57.21, 57.61, 54.05, 57.63, 61.28,
-		5.31)
+func RIVN_12062022() *AnalyzedData {
+	return tc1("RIVN",
+		Day(2022, 12, 5), 31.01, 31.24, 29.43, 29.53, 7560385.0,
+		Day(2022, 12, 6), 29.50, 29.54, 27.43, 27.89, 13170726.0,
+		-0.8436, -0.7349,
+		51.63, 49.97, 49.60, 44.26, 40.09,
+		30.97)
 }
 
 func RIVN_06292023() *AnalyzedData {
-	return sc1("RIVN",
+	return tc1("RIVN",
 		Day(2023, 6, 28), 13.90, 14.87, 13.82, 14.64, 32296426.0,
 		Day(2023, 6, 29), 14.74, 16.01, 14.61, 16.01, 48833726.0,
 		0.1716, 0.1408,
@@ -97,24 +108,40 @@ func RIVN_06292023() *AnalyzedData {
 		14.49)
 }
 
-func TestMonthClimb(t *testing.T) {
-	strategy := &MonthClimb{}
-	cases := []*AnalyzedData{
-		CRDO_05152023(),
-		RIOT_01052023(),
-		RIOT_06272023(),
-		GRPN_06282023(),
-		RIVN_06292023(),
+func TestStrategies(t *testing.T) {
+	testCases := []struct {
+		s  Strategy
+		tf []testCaseGen
+	}{
+		{
+			s: &MonthClimb{},
+			tf: []testCaseGen{
+				CRDO_05152023,
+				GRPN_06282023,
+				RIOT_01052023,
+				RIOT_06272023,
+				RIVN_06292023,
+			},
+		},
+		{
+			s: &MonthFall{},
+			tf: []testCaseGen{
+				RIVN_12062022,
+			},
+		},
 	}
 
-	for i, data := range cases {
-		signaled := strategy.SignalDetected(data)
-
-		if !signaled {
-			t.Fatalf("Expected signal in case %d for %s on %s",
-				i,
-				data.Symbol,
-				data.LastDate().Format("01/02/2006"))
+	for i, tc := range testCases {
+		for j, f := range tc.tf {
+			d := f()
+			if !tc.s.SignalDetected(f()) {
+				t.Fatalf("Expected signal '%s' in case %d:%d for %s on %s",
+					tc.s.Name(),
+					i,
+					j,
+					d.Symbol,
+					d.LastDate().Format("01/02/2006"))
+			}
 		}
 	}
 }
