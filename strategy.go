@@ -49,7 +49,7 @@ func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 		return false
 	}
 
-	if i.RSI.Value < 50 || i.RSI.LookbackMin()+15.0 > i.RSI.Value {
+	if i.RSI.Value < 50 {// || i.RSI.LookbackMin()+15.0 > i.RSI.Value {
 		return false
 	}
 

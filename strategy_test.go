@@ -85,11 +85,52 @@ func RIOT_01052023() *AnalyzedData {
 	return d
 }
 
+func RIOT_06272023() *AnalyzedData {
+	d := &AnalyzedData{Symbol: "RIOT"}
+
+	d.EODData = []*EODData{
+		&EODData{
+			Symbol: "RIOT",
+			Date:   Day(2023, 6, 26),
+			Open:   11.49,
+			High:   12.18,
+			Low:    10.72,
+			Close:  10.77,
+			Volume: 22037414.0,
+		},
+		&EODData{
+			Symbol: "RIOT",
+			Date:   Day(2023, 6, 27),
+			Open:   11.07,
+			High:   11.71,
+			Low:    10.88,
+			Close:  11.65,
+			Volume: 25685628.0,
+		},
+	}
+
+	i := &d.Indicators
+	i.Init()
+
+	i.AvgVolume = 1000001.0
+	i.AvgClose = 5.01
+
+	i.MACD.Line = 0.0572
+	i.MACD.Signal.Value = -0.0364
+
+	setRSIs(i, 56.95, 52.84, 55.66, 48.47, 55.09)
+
+	i.SMA20.Value = 11.01
+
+	return d
+}
+
 func TestMonthClimb(t *testing.T) {
 	strategy := &MonthClimb{}
 	cases := []*AnalyzedData{
 		CRDO_05152023(),
 		RIOT_01052023(),
+		RIOT_06272023(),
 	}
 
 	for i, data := range cases {
