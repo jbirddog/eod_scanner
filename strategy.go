@@ -126,16 +126,11 @@ func (s *MACDFuse) SignalDetected(a *AnalyzedData) bool {
 	gap := math.Abs(macd.Gap)
 	gapSMA5 := math.Abs(macd.GapSMA5.Value)
 
-	if gapSMA5 > 0.01 || gap < gapSMA5*5.0 {
+	if gapSMA5 > 0.1 || gap < gapSMA5*5.0 {
 		return false
 	}
 
-	if percentage(rsi.LookbackMin(), rsi.LookbackMax()) > 10.0 {
-		return false
-	}
-
-	// TODO:, rising and value is < 5% of max or similiar
-	if rsi.Value < 50.0 || !rsi.Rising() {
+	if rsi.Value < 50.0 || !rsi.Rising() || percentage(rsi.Value, rsi.LookbackMax()) > 5.0 {
 		return false
 	}
 
@@ -147,5 +142,5 @@ func (s *MACDFuse) SignalType() SignalType {
 }
 
 func (s *MACDFuse) SortWeight(a *AnalyzedData) float64 {
-	return -math.Abs(a.Indicators.MACD.Signal.Value)
+	return -a.Indicators.MACD.Signal.Value
 }

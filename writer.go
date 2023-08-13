@@ -31,8 +31,8 @@ var columns = []struct {
 	{"%", "%.2f%%"},
 	{"Close", "%.2f %.2f%% %.2f%%"},
 	{"RSI", "%.2f"},
-	{"MACD", "%.2f %.2f %f"},
-	{"Position", "%s %d @ %.2f %.2f %.2f"},
+	{"MACD", "%.2f %.2f"},
+	{"Position", "%s ~%d, %.2f"},
 }
 
 func columnFields() ([]string, []string) {
@@ -97,11 +97,8 @@ func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64)
 		i.RSI.Value,
 		i.MACD.Line,
 		i.MACD.Signal.Value,
-		i.MACD.GapSMA5.Value,
 		p.Type.String(),
 		p.Shares,
-		p.Entry,
-		p.Capitol,
 		p.StopLoss)
 }
 
