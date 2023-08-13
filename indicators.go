@@ -184,6 +184,10 @@ func (r *RSI) smooth(current float64, new float64) float64 {
 	return a*new + b*current
 }
 
+func (r *RSI) LastChange() float64 {
+	return r.Value - r.ring.Prev().Value.(float64)
+}
+
 func (r *RSI) LookbackMax() float64 {
 	max := math.Inf(-1)
 

@@ -125,12 +125,53 @@ func RIOT_06272023() *AnalyzedData {
 	return d
 }
 
+func GRPN_06282023() *AnalyzedData {
+	d := &AnalyzedData{Symbol: "GRPN"}
+
+	d.EODData = []*EODData{
+		&EODData{
+			Symbol: "GRPN",
+			Date:   Day(2023, 6, 27),
+			Open:   5.21,
+			High:   5.73,
+			Low:    5.10,
+			Close:  5.56,
+			Volume: 1205454.0,
+		},
+		&EODData{
+			Symbol: "GRPN",
+			Date:   Day(2023, 6, 28),
+			Open:   5.60,
+			High:   6.00,
+			Low:    5.49,
+			Close:  5.93,
+			Volume: 1152836.0,
+		},
+	}
+
+	i := &d.Indicators
+	i.Init()
+
+	i.AvgVolume = 1000001.0
+	i.AvgClose = 5.01
+
+	i.MACD.Line = 0.2382
+	i.MACD.Signal.Value = 0.2085
+
+	setRSIs(i, 57.21, 57.61, 54.05, 57.63, 61.28)
+
+	i.SMA20.Value = 5.31
+
+	return d
+}
+
 func TestMonthClimb(t *testing.T) {
 	strategy := &MonthClimb{}
 	cases := []*AnalyzedData{
 		CRDO_05152023(),
 		RIOT_01052023(),
 		RIOT_06272023(),
+		GRPN_06282023(),
 	}
 
 	for i, data := range cases {
@@ -138,9 +179,9 @@ func TestMonthClimb(t *testing.T) {
 
 		if !signaled {
 			t.Fatalf("Expected signal in case %d for %s on %s",
-			i,
-			data.Symbol,
-			data.LastDate().Format("01/02/2006"))
+				i,
+				data.Symbol,
+				data.LastDate().Format("01/02/2006"))
 		}
 	}
 }
