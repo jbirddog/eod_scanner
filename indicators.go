@@ -44,6 +44,8 @@ func (i *Indicators) Add(new *EODData, period int) {
 	i.SMA20.Add(close)
 	i.RSI.Add(close, period)
 	i.MACD.Update(period)
+
+	i.setFlags(close)
 }
 
 func (i *Indicators) setFlags(close float64) {
