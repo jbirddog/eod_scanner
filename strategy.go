@@ -37,15 +37,11 @@ func (s *MonthClimb) Name() string {
 func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 	i := a.Indicators
 
-	// TODO: for the strategies, avgVolume makes it hard to test historic scenarios
-	// since there is no way to tell the avg volume at that time
-	// shift to comparison to previous volume(s)?
-
-	if hasLowVolumeOrPrice(a) || a.LastVolume() < i.AvgVolume {
+	if hasLowVolumeOrPrice(a) || a.LastChange() < 0.0 {
 		return false
 	}
 
-	if a.LastChange() < 0.0 || a.LastClose() < i.SMA20.Value {
+	if i.Flags&0x1 == 0 || i.Flags&0x6 == 0x6 {
 		return false
 	}
 
@@ -81,15 +77,15 @@ func (s *MonthFall) Name() string {
 func (s *MonthFall) SignalDetected(a *AnalyzedData) bool {
 	i := a.Indicators
 
-	if hasLowVolumeOrPrice(a) || a.LastVolume() < i.AvgVolume {
+	if hasLowVolumeOrPrice(a) || a.LastChange() > 0.0 {
 		return false
 	}
 
-	if a.LastChange() > 0.0 || a.LastClose() > i.SMA20.Value {
+	if i.Flags&0x6 == 0 {
 		return false
 	}
 
-	if i.RSI.Value > 50 || i.RSI.LookbackMax()-15.0 < i.RSI.Value {
+	if i.RSI.Value > 50 || i.RSI.LastChange() > 0.0 {
 		return false
 	}
 

@@ -5,7 +5,11 @@ import (
 	"math"
 )
 
-// TODO: need to add some tests for these indicators
+type IndicatorFlags uint64
+
+const (
+	PREV_TWO_DAYS = 0x6
+)
 
 type Indicators struct {
 	AvgVolume float64
@@ -16,6 +20,7 @@ type Indicators struct {
 	SMA20     SMA
 	RSI       RSI
 	MACD      MACD
+	Flags     IndicatorFlags
 }
 
 func (i *Indicators) Init() {
@@ -39,6 +44,15 @@ func (i *Indicators) Add(new *EODData, period int) {
 	i.SMA20.Add(close)
 	i.RSI.Add(close, period)
 	i.MACD.Update(period)
+}
+
+func (i *Indicators) setFlags(close float64) {
+	// TODO: when this expands to more flags, mask out the 8th bits
+	i.Flags <<= 1
+
+	if close > i.SMA20.Value {
+		i.Flags |= 1
+	}
 }
 
 //
@@ -185,7 +199,8 @@ func (r *RSI) smooth(current float64, new float64) float64 {
 }
 
 func (r *RSI) LastChange() float64 {
-	return r.Value - r.ring.Prev().Value.(float64)
+	// TODO: bring back U8LossyLookback
+	return r.Value - r.ring.Prev().Prev().Value.(float64)
 }
 
 func (r *RSI) LookbackMax() float64 {
