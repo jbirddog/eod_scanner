@@ -56,9 +56,19 @@ func tc1(sym string,
 
 type testCaseGen func() *AnalyzedData
 
+func APP_01202023() *AnalyzedData {
+	return tc1("APP",
+		Day(2023, 1, 19), 10.40, 10.62, 10.09, 10.18, 1_856_516.0,
+		Day(2023, 1, 20), 10.27, 10.95, 10.13, 10.94, 1_960_167.0,
+		-0.2818, -0.4939,
+		48.51, 49.47, 47.35, 42.27, 50.61,
+		10.31,
+		0b00000101)
+}
+
 func CRDO_05152023() *AnalyzedData {
 	return tc1("CRDO",
-		Day(2023, 5, 12), 7.95, 8.06, 7.82, 7.91, 537400.0,
+		Day(2023, 5, 12), 7.95, 8.06, 7.82, 7.91, 537_400.0,
 		Day(2023, 5, 15), 7.99, 8.64, 7.96, 8.61, 1_463_100.0,
 		-0.2746, -0.3848,
 		35.48, 41.89, 43.11, 42.62, 55.19,
@@ -128,33 +138,53 @@ func RIVN_06292023() *AnalyzedData {
 
 func TestStrategies(t *testing.T) {
 	testCases := []struct {
-		s  Strategy
-		tf []testCaseGen
+		s    Strategy
+		posF []testCaseGen
+		negF []testCaseGen
 	}{
 		{
 			s: &MonthClimb{},
-			tf: []testCaseGen{
+			posF: []testCaseGen{
+				APP_01202023,
 				CRDO_05152023,
 				GRPN_06282023,
 				RIOT_01052023,
 				RIOT_06272023,
 				RIVN_06292023,
 			},
+			negF: []testCaseGen{
+				GRPN_02062023,
+			},
 		},
 		{
 			s: &MonthFall{},
-			tf: []testCaseGen{
+			posF: []testCaseGen{
 				GRPN_02062023,
 				RIVN_12062022,
+			},
+			negF: []testCaseGen{
+				GRPN_06282023,
 			},
 		},
 	}
 
 	for i, tc := range testCases {
-		for j, f := range tc.tf {
+		for j, f := range tc.posF {
 			d := f()
-			if !tc.s.SignalDetected(f()) {
+			if !tc.s.SignalDetected(d) {
 				t.Fatalf("Expected signal '%s' in case %d:%d for %s on %s",
+					tc.s.Name(),
+					i,
+					j,
+					d.Symbol,
+					d.LastDate().Format("01/02/2006"))
+			}
+		}
+
+		for j, f := range tc.negF {
+			d := f()
+			if tc.s.SignalDetected(d) {
+				t.Fatalf("Unexpected signal '%s' in case %d:%d for %s on %s",
 					tc.s.Name(),
 					i,
 					j,
