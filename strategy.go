@@ -21,7 +21,7 @@ type Strategy interface {
 func hasLowVolumeOrPrice(a *AnalyzedData) bool {
 	i := a.Indicators
 
-	return i.AvgVolume < 1000000 || i.AvgClose < 5.0
+	return i.AvgVolume < 1_000_000 || i.AvgClose < 5.0
 }
 
 //
