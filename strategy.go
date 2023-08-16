@@ -111,7 +111,7 @@ func (s *MonthFall) SortWeight(a *AnalyzedData) float64 {
 type MACDFuse struct{}
 
 func (s *MACDFuse) Name() string {
-	return "MACD Fuse"
+	return "MACD Fuse (WIP)"
 }
 
 func (s *MACDFuse) SignalDetected(a *AnalyzedData) bool {

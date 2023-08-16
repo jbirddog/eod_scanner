@@ -7,10 +7,6 @@ import (
 
 type IndicatorFlags uint64
 
-const (
-	PREV_TWO_DAYS = 0x6
-)
-
 type Indicators struct {
 	AvgVolume float64
 	AvgClose  float64
@@ -20,6 +16,7 @@ type Indicators struct {
 	SMA20     SMA
 	RSI       RSI
 	MACD      MACD
+	BB        BollingerBands
 	Flags     IndicatorFlags
 }
 
@@ -30,6 +27,7 @@ func (i *Indicators) Init() {
 	i.SMA20.Init(20)
 	i.RSI.Init(14, 5)
 	i.MACD.Init(&i.EMA12, &i.EMA26, 9)
+	i.BB.Init(&i.SMA20, 2)
 }
 
 func (i *Indicators) Add(new *EODData, period int) {
@@ -44,6 +42,7 @@ func (i *Indicators) Add(new *EODData, period int) {
 	i.SMA20.Add(close)
 	i.RSI.Add(close, period)
 	i.MACD.Update(period)
+	i.BB.Add(close)
 
 	i.setFlags(close)
 }
@@ -237,4 +236,34 @@ func (r *RSI) Rising() bool {
 func (r *RSI) Falling() bool {
 	lookback := r.ring.Next()
 	return lookback != nil && lookback.Value.(float64) > r.Value
+}
+
+//
+// Bollinger Bands
+//
+
+type BollingerBands struct {
+	sma     *SMA
+	squares SMA
+	stdDevs float64
+	Upper   float64
+	Middle  float64
+	Lower   float64
+}
+
+func (b *BollingerBands) Init(sma *SMA, stdDevs int) {
+	b.sma = sma
+	b.squares.Init(sma.Periods)
+	b.stdDevs = float64(stdDevs)
+}
+
+func (b *BollingerBands) Add(new float64) {
+	sma := b.sma.Value
+	square := math.Pow(new-sma, 2)
+	b.squares.Add(square)
+	stdDev := math.Sqrt(b.squares.Value)
+	distance := stdDev * b.stdDevs
+	b.Upper = sma + distance
+	b.Middle = sma
+	b.Lower = sma - distance
 }
