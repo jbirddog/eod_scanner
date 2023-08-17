@@ -1,30 +1,30 @@
 package main
 
 import (
+	"flag"
 	"log"
-	"os"
 )
 
 func main() {
-	dataDir := os.Getenv("EOD_DATA_DIR")
-	if dataDir == "" {
-		log.Fatal("Must set environment variable EOD_DATA_DIR")
+	configFile := flag.String("config", "", "Path to config file")
+	flag.Parse()
+
+	config, err := ConfigFromFile(*configFile)
+	if err != nil {
+		log.Fatalf("Failed to parse config file: %s\n", err)
 	}
 
-	currentDay := Day(2023, 8, 17)
-	marketDayCount := 65
-	strategies := []Strategy{
-		&MonthClimb{},
-		&MonthFall{},
-		//&MACDFuse{},
-	}
-	writer := NewMarkdownWriter()
+	results, err := Scan(config.CurrentDay,
+		config.MarketDayCount,
+		config.DataDir,
+		config.Strategies)
 
-	// TODO: pass in via config
-	results, err := Scan(currentDay, marketDayCount, dataDir, strategies)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	PrintReport(results, currentDay, writer)
+	PrintReport(results,
+		config.CurrentDay,
+		config.RiskPerTrade,
+		config.Writer)
 }

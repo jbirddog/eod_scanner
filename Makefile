@@ -15,4 +15,4 @@ tests:
 
 .PHONY: start
 start: compile
-	time ./eod_scanner
+	time ./eod_scanner -config .config.json
