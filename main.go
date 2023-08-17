@@ -24,7 +24,7 @@ func main() {
 	}
 
 	PrintReport(results,
-	config.CurrentDay,
-	config.RiskPerTrade,
-	config.Writer)
+		config.CurrentDay,
+		config.RiskPerTrade,
+		config.Writer)
 }
