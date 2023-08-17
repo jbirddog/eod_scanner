@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"math"
 	"os"
 	"time"
 )
@@ -11,8 +13,11 @@ type Config struct {
 	DataDir        string    `json:dataDir`
 	MarketDayCount int       `json:marketDayCount`
 	CurrentDay     time.Time `json:currentDay`
+	RiskPerTrade   float64   `json:riskPerTrade`
+	StrategyNames  []string  `json:strategyNames`
+	WriterName     string    `json:writerName`
 	Writer         Writer
-	WriterName     string `json:writerName`
+	Strategies     []Strategy
 }
 
 func ConfigFromFile(path string) (*Config, error) {
@@ -45,7 +50,15 @@ func ConfigFromFile(path string) (*Config, error) {
 
 func (c *Config) validate() error {
 	if c.DataDir == "" {
-		return errors.New("Field `dataDir` is missing from config")
+		return errors.New("Field `dataDir` is empty or missing")
+	}
+
+	if c.RiskPerTrade < math.SmallestNonzeroFloat64 {
+		return errors.New("Field `riskPerTrade` must be a value > 0.0")
+	}
+
+	if len(c.StrategyNames) == 0 {
+		return errors.New("Field `strategyNames` is empty or missing")
 	}
 
 	return nil
@@ -71,8 +84,21 @@ func (c *Config) instantiateObjects() error {
 	case "markdown":
 		c.Writer = NewMarkdownWriter()
 	default:
-		return errors.New("Invalid writerName in config")
+		return errors.New("Invalid writerName")
 	}
-	
+
+	c.Strategies = make([]Strategy, len(c.StrategyNames))
+
+	for i, name := range c.StrategyNames {
+		switch name {
+		case "monthClimb":
+			c.Strategies[i] = &MonthClimb{}
+		case "monthFall":
+			c.Strategies[i] = &MonthFall{}
+		default:
+			return fmt.Errorf("Invalid strategyName '%s'", name)
+		}
+	}
+
 	return nil
 }

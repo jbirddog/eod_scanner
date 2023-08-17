@@ -14,17 +14,17 @@ func main() {
 		log.Fatalf("Failed to parse config file: %s\n", err)
 	}
 
-	strategies := []Strategy{
-		&MonthClimb{},
-		&MonthFall{},
-		//&MACDFuse{},
-	}
+	results, err := Scan(config.CurrentDay,
+		config.MarketDayCount,
+		config.DataDir,
+		config.Strategies)
 
-	// TODO: pass in via config
-	results, err := Scan(config.CurrentDay, config.MarketDayCount, config.DataDir, strategies)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	PrintReport(results, config.CurrentDay, config.Writer)
+	PrintReport(results,
+	config.CurrentDay,
+	config.RiskPerTrade,
+	config.Writer)
 }
