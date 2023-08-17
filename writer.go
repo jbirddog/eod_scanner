@@ -103,7 +103,7 @@ func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64)
 		p.Type.String(),
 		p.Shares,
 		p.StopLoss,
-		p.Capitol)
+		p.Capital)
 }
 
 func (m *MarkdownWriter) WriteSectionFooter(r *ScanResult) {
