@@ -1,15 +1,17 @@
 package main
 
 import (
+	"flag"
 	"log"
-	"os"
 )
 
 func main() {
-	dataDir := os.Getenv("EOD_DATA_DIR")
-	if dataDir == "" {
-		log.Fatal("Must set environment variable EOD_DATA_DIR")
-	}
+	configFile := flag.String("config", "", "Path to config file")
+	flag.Parse()
+
+	config := ConfigFromFile(*configFile)
+
+	dataDir := config.DataDir
 
 	currentDay := Day(2023, 8, 17)
 	marketDayCount := 65
