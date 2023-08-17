@@ -19,7 +19,6 @@ func main() {
 		&MonthFall{},
 		//&MACDFuse{},
 	}
-	writer := NewMarkdownWriter()
 
 	// TODO: pass in via config
 	results, err := Scan(config.CurrentDay, config.MarketDayCount, config.DataDir, strategies)
@@ -27,5 +26,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	PrintReport(results, config.CurrentDay, writer)
+	PrintReport(results, config.CurrentDay, config.Writer)
 }

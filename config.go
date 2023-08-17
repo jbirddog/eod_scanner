@@ -11,6 +11,8 @@ type Config struct {
 	DataDir        string    `json:dataDir`
 	MarketDayCount int       `json:marketDayCount`
 	CurrentDay     time.Time `json:currentDay`
+	Writer         Writer
+	WriterName     string `json:writerName`
 }
 
 func ConfigFromFile(path string) (*Config, error) {
@@ -34,6 +36,10 @@ func ConfigFromFile(path string) (*Config, error) {
 
 	config.setDefaultValues()
 
+	if err = config.instantiateObjects(); err != nil {
+		return nil, err
+	}
+
 	return config, nil
 }
 
@@ -54,4 +60,19 @@ func (c *Config) setDefaultValues() {
 		now := time.Now()
 		c.CurrentDay = Day(now.Year(), now.Month(), now.Day())
 	}
+
+	if c.WriterName == "" {
+		c.WriterName = "markdown"
+	}
+}
+
+func (c *Config) instantiateObjects() error {
+	switch c.WriterName {
+	case "markdown":
+		c.Writer = NewMarkdownWriter()
+	default:
+		return errors.New("Invalid writerName in config")
+	}
+	
+	return nil
 }
