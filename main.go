@@ -9,12 +9,11 @@ func main() {
 	configFile := flag.String("config", "", "Path to config file")
 	flag.Parse()
 
-	config := ConfigFromFile(*configFile)
+	config, err := ConfigFromFile(*configFile)
+	if err != nil {
+		log.Fatalf("Failed to parse config file: %s\n", err)
+	}
 
-	dataDir := config.DataDir
-
-	currentDay := Day(2023, 8, 17)
-	marketDayCount := 65
 	strategies := []Strategy{
 		&MonthClimb{},
 		&MonthFall{},
@@ -23,10 +22,10 @@ func main() {
 	writer := NewMarkdownWriter()
 
 	// TODO: pass in via config
-	results, err := Scan(currentDay, marketDayCount, dataDir, strategies)
+	results, err := Scan(config.CurrentDay, config.MarketDayCount, config.DataDir, strategies)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	PrintReport(results, currentDay, writer)
+	PrintReport(results, config.CurrentDay, writer)
 }
