@@ -63,6 +63,9 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 	for i, dailyData := range eodData {
 		for _, record := range dailyData {
 			symbol := record.Symbol
+			if symbol != "ONB" {
+				continue
+			}
 			data, found := analyzed[symbol]
 			if !found {
 				data = NewAnalyzedData(symbol, days)

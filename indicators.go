@@ -2,6 +2,7 @@ package main
 
 import (
 	"container/ring"
+	"fmt"
 	"math"
 )
 
@@ -42,8 +43,12 @@ func (i *Indicators) Add(new *EODData, period int) {
 	i.SMA20.Add(close)
 	i.RSI.Add(close, period)
 	i.MACD.Update(period)
+
+if period > -1 {
 	i.BB.Add(close)
 
+	fmt.Printf("%s: %.2f %.2f %.2f %.2f\n", new.Date.Format("01/02/2006"), close, i.BB.Upper, i.BB.Middle, i.BB.Lower)
+}
 	i.setFlags(close)
 }
 
@@ -244,26 +249,49 @@ func (r *RSI) Falling() bool {
 
 type BollingerBands struct {
 	sma     *SMA
-	squares SMA
-	stdDevs float64
+	_s1 SMA
+	_s2 SMA
+	s1      float64
+	s2      float64
+	n       float64
+	m float64
 	Upper   float64
 	Middle  float64
 	Lower   float64
 }
 
-func (b *BollingerBands) Init(sma *SMA, stdDevs int) {
+func (b *BollingerBands) Init(sma *SMA, m int) {
 	b.sma = sma
-	b.squares.Init(sma.Periods)
-	b.stdDevs = float64(stdDevs)
+	b._s1.Init(sma.Periods)
+	b._s2.Init(sma.Periods)
+	b.m = float64(m)
 }
 
 func (b *BollingerBands) Add(new float64) {
 	sma := b.sma.Value
-	square := math.Pow(new-sma, 2)
-	b.squares.Add(square)
-	stdDev := math.Sqrt(b.squares.Value)
-	distance := stdDev * b.stdDevs
+	b._s1.Add(new)
+	b._s2.Add(math.Pow(new, 2))
+	
+	v := (b._s2.Value - math.Pow(b._s1.Value, 2))
+	if b.n > 1.0 {
+		v *= b.n / (b.n - 1.0)
+	}
+	stdDev := math.Sqrt(v)
+	
+	distance := stdDev * b.m
+	fmt.Printf("-- %.2f %.2f\n", sma, stdDev)
 	b.Upper = sma + distance
 	b.Middle = sma
 	b.Lower = sma - distance
+}
+
+func (b *BollingerBands) stdDev(new float64) float64 {
+	b.s1 += new
+	b.s2 += math.Pow(new, 2)
+	b.n += 1
+	v := ((b.s2 / b.n) - math.Pow(b.s1/b.n, 2))
+	if b.n > 1.0 {
+		v *= b.n / (b.n - 1.0)
+	}
+	return math.Sqrt(v)
 }
