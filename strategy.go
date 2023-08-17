@@ -1,5 +1,9 @@
 package main
 
+import (
+	"math"
+)
+
 type SignalType int
 
 const (
@@ -15,10 +19,9 @@ type Strategy interface {
 }
 
 func hasLowVolumeOrPrice(a *AnalyzedData) bool {
-	avgClose := a.Indicators.AvgClose
-	avgVol := a.Indicators.AvgVolume
+	i := a.Indicators
 
-	return avgVol < 1000000 || a.LastVolume() < avgVol || avgClose < 5.0
+	return i.AvgVolume < 1_000_000 || i.AvgClose < 5.0
 }
 
 //
@@ -34,19 +37,19 @@ func (s *MonthClimb) Name() string {
 func (s *MonthClimb) SignalDetected(a *AnalyzedData) bool {
 	i := a.Indicators
 
-	if hasLowVolumeOrPrice(a) {
+	if hasLowVolumeOrPrice(a) || a.LastChange() < 0.0 {
 		return false
 	}
 
-	if a.LastChange() < 0.0 || a.LastClose() < i.SMA20.Value {
+	if i.Flags&0x1 == 0 || i.Flags&0x6 == 0x6 {
 		return false
 	}
 
-	if i.RSI.Value < 50 || i.RSI.LookbackMin()+15.0 > i.RSI.Value {
+	if i.RSI.Value < 50 || i.RSI.LastChange() < 0.0 {
 		return false
 	}
 
-	if i.MACD.Gap() < 0.0 {
+	if i.MACD.Gap() <= 0.0 {
 		return false
 	}
 
@@ -74,19 +77,19 @@ func (s *MonthFall) Name() string {
 func (s *MonthFall) SignalDetected(a *AnalyzedData) bool {
 	i := a.Indicators
 
-	if hasLowVolumeOrPrice(a) {
+	if hasLowVolumeOrPrice(a) || a.LastChange() > 0.0 {
 		return false
 	}
 
-	if a.LastChange() > 0.0 || a.LastClose() > i.SMA20.Value {
+	if i.Flags&0x6 == 0 {
 		return false
 	}
 
-	if i.RSI.Value > 50 || i.RSI.LookbackMax()-15.0 < i.RSI.Value {
+	if i.RSI.Value > 50 || i.RSI.LastChange() > 0.0 {
 		return false
 	}
 
-	if i.MACD.Gap() > 0.0 {
+	if i.MACD.Gap() >= 0.0 {
 		return false
 	}
 
@@ -99,4 +102,44 @@ func (s *MonthFall) SignalType() SignalType {
 
 func (s *MonthFall) SortWeight(a *AnalyzedData) float64 {
 	return a.Indicators.MACD.Line
+}
+
+//
+// MACD Fuse
+//
+
+type MACDFuse struct{}
+
+func (s *MACDFuse) Name() string {
+	return "MACD Fuse (WIP)"
+}
+
+func (s *MACDFuse) SignalDetected(a *AnalyzedData) bool {
+	if hasLowVolumeOrPrice(a) {
+		return false
+	}
+
+	macd := a.Indicators.MACD
+	rsi := a.Indicators.RSI
+
+	gap := math.Abs(macd.Gap())
+	gapSMA5 := math.Abs(macd.GapSMA5.Value)
+
+	if gapSMA5 > 0.1 || gap < gapSMA5*5.0 {
+		return false
+	}
+
+	if rsi.Value < 50.0 || !rsi.Rising() || percentage(rsi.Value, rsi.LookbackMax()) > 5.0 {
+		return false
+	}
+
+	return true
+}
+
+func (s *MACDFuse) SignalType() SignalType {
+	return Buy
+}
+
+func (s *MACDFuse) SortWeight(a *AnalyzedData) float64 {
+	return -a.Indicators.MACD.Signal.Value
 }

@@ -23,7 +23,7 @@ type Position struct {
 	Type     PositionType
 	Shares   int
 	Entry    float64
-	Capitol  float64
+	Capital  float64
 	StopLoss float64
 }
 
@@ -43,13 +43,13 @@ func PositionFromAnalyzedData(data *AnalyzedData, risk float64, signalType Signa
 	}
 
 	shares := int(risk / riskPerShare)
-	capitol := float64(shares) * entry
+	capital := float64(shares) * entry
 
 	return &Position{
 		Type:     positionType,
 		Shares:   shares,
 		Entry:    entry,
-		Capitol:  capitol,
+		Capital:  capital,
 		StopLoss: stopLoss,
 	}
 }

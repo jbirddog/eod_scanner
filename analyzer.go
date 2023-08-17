@@ -2,6 +2,7 @@ package main
 
 import (
 	"sort"
+	"time"
 )
 
 type AnalyzedData struct {
@@ -35,6 +36,10 @@ func (a *AnalyzedData) LastChange() float64 {
 	close2 := a.EODData[days-2].Close
 
 	return percentage(close1, close2)
+}
+
+func (a *AnalyzedData) LastDate() time.Time {
+	return a.EODData[len(a.EODData)-1].Date
 }
 
 func (a *AnalyzedData) LastVolume() float64 {

@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// TODO: need to add some tests for these indicators
+type IndicatorFlags uint64
 
 type Indicators struct {
 	AvgVolume float64
@@ -16,6 +16,8 @@ type Indicators struct {
 	SMA20     SMA
 	RSI       RSI
 	MACD      MACD
+	BB        BollingerBands
+	Flags     IndicatorFlags
 }
 
 func (i *Indicators) Init() {
@@ -25,6 +27,7 @@ func (i *Indicators) Init() {
 	i.SMA20.Init(20)
 	i.RSI.Init(14, 5)
 	i.MACD.Init(&i.EMA12, &i.EMA26, 9)
+	i.BB.Init(&i.SMA20, 2)
 }
 
 func (i *Indicators) Add(new *EODData, period int) {
@@ -39,6 +42,18 @@ func (i *Indicators) Add(new *EODData, period int) {
 	i.SMA20.Add(close)
 	i.RSI.Add(close, period)
 	i.MACD.Update(period)
+	i.BB.Add(close)
+
+	i.setFlags(close)
+}
+
+func (i *Indicators) setFlags(close float64) {
+	// TODO: when this expands to more flags, mask out the 8th bits
+	i.Flags <<= 1
+
+	if close > i.SMA20.Value {
+		i.Flags |= 1
+	}
 }
 
 //
@@ -102,22 +117,25 @@ func (e *EMA) Add(new float64, period int) {
 //
 
 type MACD struct {
-	Line   float64
-	Signal EMA
-	fast   *EMA
-	slow   *EMA
+	Line    float64
+	Signal  EMA
+	GapSMA5 SMA
+	fast    *EMA
+	slow    *EMA
 }
 
 func (m *MACD) Init(fast *EMA, slow *EMA, signalPeriods int) {
 	m.fast = fast
 	m.slow = slow
 	m.Signal.Init(signalPeriods)
+	m.GapSMA5.Init(5)
 }
 
 func (m *MACD) Update(period int) {
 	m.Line = m.fast.Value - m.slow.Value
 
 	m.Signal.Add(m.Line, period)
+	m.GapSMA5.Add(m.Gap())
 }
 
 func (m *MACD) Gap() float64 {
@@ -181,6 +199,11 @@ func (r *RSI) smooth(current float64, new float64) float64 {
 	return a*new + b*current
 }
 
+func (r *RSI) LastChange() float64 {
+	// TODO: bring back U8LossyLookback
+	return r.Value - r.ring.Prev().Prev().Value.(float64)
+}
+
 func (r *RSI) LookbackMax() float64 {
 	max := math.Inf(-1)
 
@@ -203,4 +226,44 @@ func (r *RSI) LookbackMin() float64 {
 	})
 
 	return min
+}
+
+func (r *RSI) Rising() bool {
+	lookback := r.ring.Next()
+	return lookback != nil && lookback.Value.(float64) < r.Value
+}
+
+func (r *RSI) Falling() bool {
+	lookback := r.ring.Next()
+	return lookback != nil && lookback.Value.(float64) > r.Value
+}
+
+//
+// Bollinger Bands
+//
+
+type BollingerBands struct {
+	sma     *SMA
+	squares SMA
+	m       float64
+	Upper   float64
+	Middle  float64
+	Lower   float64
+}
+
+func (b *BollingerBands) Init(sma *SMA, m int) {
+	b.sma = sma
+	b.squares.Init(sma.Periods)
+	b.m = float64(m)
+}
+
+func (b *BollingerBands) Add(new float64) {
+	sma := b.sma.Value
+	b.squares.Add(math.Pow(new, 2))
+	v := (b.squares.Value - math.Pow(sma, 2))
+	distance := math.Sqrt(v) * b.m
+
+	b.Upper = sma + distance
+	b.Middle = sma
+	b.Lower = sma - distance
 }
