@@ -143,3 +143,39 @@ func (s *MACDFuse) SignalType() SignalType {
 func (s *MACDFuse) SortWeight(a *AnalyzedData) float64 {
 	return -a.Indicators.MACD.Signal.Value
 }
+
+//
+// Fall -> Level -> Fall
+//
+
+type FallLevelFall struct{}
+
+func (s *FallLevelFall) Name() string {
+	return "FallLevel Fall"
+}
+
+func (s *FallLevelFall) SignalDetected(a *AnalyzedData) bool {
+	i := a.Indicators
+
+	if hasLowVolumeOrPrice(a) || math.Abs(a.LastChange()) > 0.25 {
+		return false
+	}
+
+	if i.RSI.Value > 50 || i.RSI.LastChange() > 0.0 {
+		return false
+	}
+
+	if i.MACD.Gap() >= 0.0 {
+		return false
+	}
+
+	return true
+}
+
+func (s *FallLevelFall) SignalType() SignalType {
+	return Sell
+}
+
+func (s *FallLevelFall) SortWeight(a *AnalyzedData) float64 {
+	return -math.Abs(a.LastChange())
+}

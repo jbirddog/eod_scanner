@@ -81,7 +81,7 @@ func (c *Config) setDefaultValues() {
 
 func (c *Config) instantiateObjects() error {
 	switch c.WriterName {
-	case "markdown":
+	case "Markdown":
 		c.Writer = NewMarkdownWriter()
 	default:
 		return errors.New("Invalid writerName")
@@ -91,10 +91,12 @@ func (c *Config) instantiateObjects() error {
 
 	for i, name := range c.StrategyNames {
 		switch name {
-		case "monthClimb":
+		case "MonthClimb":
 			c.Strategies[i] = &MonthClimb{}
-		case "monthFall":
+		case "MonthFall":
 			c.Strategies[i] = &MonthFall{}
+		case "FallLevelFall":
+			c.Strategies[i] = &FallLevelFall{}
 		default:
 			return fmt.Errorf("Invalid strategyName '%s'", name)
 		}
