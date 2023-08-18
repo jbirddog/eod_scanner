@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -16,6 +17,20 @@ type Strategy interface {
 	SignalDetected(a *AnalyzedData) bool
 	SignalType() SignalType
 	SortWeight(a *AnalyzedData) float64
+}
+
+var strategies = map[string]Strategy{
+	"fallLevelFall": &FallLevelFall{},
+	"monthClimb":    &MonthClimb{},
+	"monthFall":     &MonthFall{},
+}
+
+func StrategyNamed(name string) (Strategy, error) {
+	if strategy, found := strategies[name]; found {
+		return strategy, nil
+	}
+
+	return nil, fmt.Errorf("Unknown strategy name: '%s'", name)
 }
 
 func hasLowVolumeOrPrice(a *AnalyzedData) bool {
@@ -145,13 +160,13 @@ func (s *MACDFuse) SortWeight(a *AnalyzedData) float64 {
 }
 
 //
-// Fall -> Level -> Fall
+// Fall Level Fall
 //
 
 type FallLevelFall struct{}
 
 func (s *FallLevelFall) Name() string {
-	return "FallLevel Fall"
+	return "Fall Level Fall"
 }
 
 func (s *FallLevelFall) SignalDetected(a *AnalyzedData) bool {

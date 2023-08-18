@@ -138,12 +138,12 @@ func RIVN_06292023() *AnalyzedData {
 
 func TestStrategies(t *testing.T) {
 	testCases := []struct {
-		s    Strategy
+		s    string
 		posF []testCaseGen
 		negF []testCaseGen
 	}{
 		{
-			s: &MonthClimb{},
+			s: "monthClimb",
 			posF: []testCaseGen{
 				APP_01202023,
 				CRDO_05152023,
@@ -157,7 +157,7 @@ func TestStrategies(t *testing.T) {
 			},
 		},
 		{
-			s: &MonthFall{},
+			s: "monthFall",
 			posF: []testCaseGen{
 				GRPN_02062023,
 				RIVN_12062022,
@@ -169,11 +169,16 @@ func TestStrategies(t *testing.T) {
 	}
 
 	for i, tc := range testCases {
+		s, err := StrategyNamed(tc.s)
+		if err != nil {
+			t.Error(err)
+		}
+
 		for j, f := range tc.posF {
 			d := f()
-			if !tc.s.SignalDetected(d) {
+			if !s.SignalDetected(d) {
 				t.Fatalf("Expected signal '%s' in case %d:%d for %s on %s",
-					tc.s.Name(),
+					tc.s,
 					i,
 					j,
 					d.Symbol,
@@ -183,9 +188,9 @@ func TestStrategies(t *testing.T) {
 
 		for j, f := range tc.negF {
 			d := f()
-			if tc.s.SignalDetected(d) {
+			if s.SignalDetected(d) {
 				t.Fatalf("Unexpected signal '%s' in case %d:%d for %s on %s",
-					tc.s.Name(),
+					tc.s,
 					i,
 					j,
 					d.Symbol,
