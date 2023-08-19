@@ -176,11 +176,11 @@ func (s *FallLevelFall) SignalDetected(a *AnalyzedData) bool {
 		return false
 	}
 
-	if i.RSI.Value > 50 || i.RSI.LastChange() > 0.0 {
+	if i.RSI.Value > 50 || i.MACD.Gap() >= 0.0 {
 		return false
 	}
 
-	if i.MACD.Gap() >= 0.0 {
+	if s.lastFall(a) > -3.0 {
 		return false
 	}
 
@@ -192,5 +192,13 @@ func (s *FallLevelFall) SignalType() SignalType {
 }
 
 func (s *FallLevelFall) SortWeight(a *AnalyzedData) float64 {
-	return -math.Abs(a.LastChange())
+	return -s.lastFall(a)
+}
+
+func (s *FallLevelFall) lastFall(a *AnalyzedData) float64 {
+	minClose := min(a.LastClose(), a.PreviousClose())
+	maxClose := a.MaxOfNCloses(5)
+	change := percentage(minClose, maxClose)
+
+	return change
 }

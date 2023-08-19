@@ -25,6 +25,22 @@ func (a *AnalyzedData) LastClose() float64 {
 	return a.EODData[len(a.EODData)-1].Close
 }
 
+func (a *AnalyzedData) PreviousClose() float64 {
+	return a.EODData[len(a.EODData)-2].Close
+}
+
+func (a *AnalyzedData) MaxOfNCloses(n int) float64 {
+	maxClose := 0.0
+
+	for i := 0; i < n; i++ {
+		if close := a.EODData[len(a.EODData)-1-i].Close; close > maxClose {
+			maxClose = close
+		}
+	}
+
+	return maxClose
+}
+
 func (a *AnalyzedData) LastChange() float64 {
 	days := len(a.EODData)
 
@@ -32,10 +48,7 @@ func (a *AnalyzedData) LastChange() float64 {
 		return 0.0
 	}
 
-	close1 := a.EODData[days-1].Close
-	close2 := a.EODData[days-2].Close
-
-	return percentage(close1, close2)
+	return percentage(a.LastClose(), a.PreviousClose())
 }
 
 func (a *AnalyzedData) LastDate() time.Time {
