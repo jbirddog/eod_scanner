@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-// TODO: move these to own file once a few are built out
 func tc1(sym string,
 	d1 time.Time, o1, h1, l1, c1, v1 float64,
 	d2 time.Time, o2, h2, l2, c2, v2 float64,
@@ -17,24 +16,46 @@ func tc1(sym string,
 	d := &AnalyzedData{Symbol: sym}
 
 	d.EODData = []*EODData{
-		&EODData{
-			Symbol: sym,
-			Date:   d1,
-			Open:   o1,
-			High:   h1,
-			Low:    l1,
-			Close:  c1,
-			Volume: v1,
-		},
-		&EODData{
-			Symbol: sym,
-			Date:   d2,
-			Open:   o2,
-			High:   h2,
-			Low:    l2,
-			Close:  c2,
-			Volume: v2,
-		},
+		&EODData{sym, d1, o1, h1, l1, c1, v1},
+		&EODData{sym, d2, o2, h2, l2, c2, v2},
+	}
+
+	i := &d.Indicators
+	i.Init()
+
+	i.AvgVolume = 1_000_001.0
+	i.AvgClose = 5.01
+
+	i.MACD.Line = ml
+	i.MACD.Signal.Value = ms
+
+	setRSIs(i, r1, r2, r3, r4, r5)
+
+	i.SMA20.Value = s
+	i.Flags = flags
+
+	return d
+}
+
+func tc2(sym string,
+	d1 time.Time, o1, h1, l1, c1, v1 float64,
+	d2 time.Time, o2, h2, l2, c2, v2 float64,
+	d3 time.Time, o3, h3, l3, c3, v3 float64,
+	d4 time.Time, o4, h4, l4, c4, v4 float64,
+	d5 time.Time, o5, h5, l5, c5, v5 float64,
+	ml, ms float64,
+	r1, r2, r3, r4, r5 float64,
+	s float64,
+	flags IndicatorFlags,
+) *AnalyzedData {
+	d := &AnalyzedData{Symbol: sym}
+
+	d.EODData = []*EODData{
+		&EODData{sym, d1, o1, h1, l1, c1, v1},
+		&EODData{sym, d2, o2, h2, l2, c2, v2},
+		&EODData{sym, d3, o3, h3, l3, c3, v3},
+		&EODData{sym, d4, o4, h4, l4, c4, v4},
+		&EODData{sym, d5, o5, h5, l5, c5, v5},
 	}
 
 	i := &d.Indicators
@@ -55,6 +76,19 @@ func tc1(sym string,
 }
 
 type testCaseGen func() *AnalyzedData
+
+func ALGM_08032023() *AnalyzedData {
+	return tc2("ALGM",
+		Day(2023, 7, 28), 50.23, 50.89, 49.67, 50.84, 1_161_507,
+		Day(2023, 7, 31), 51.34, 52.26, 51.16, 51.61, 2_267_876,
+		Day(2023, 8, 1), 49.50, 49.64, 45.02, 45.24, 4_354_653,
+		Day(2023, 8, 2), 45.00, 45.00, 42.29, 43.22, 3_141_946,
+		Day(2023, 8, 3), 42.55, 43.39, 41.92, 43.13, 1_815_615,
+		1.53, 2.03,
+		56.71, 58.45, 62.38, 64.20, 44.84,
+		48.51,
+		0b00000000)
+}
 
 func APP_01202023() *AnalyzedData {
 	return tc1("APP",
@@ -161,6 +195,15 @@ func TestStrategies(t *testing.T) {
 			posF: []testCaseGen{
 				GRPN_02062023,
 				RIVN_12062022,
+			},
+			negF: []testCaseGen{
+				GRPN_06282023,
+			},
+		},
+		{
+			s: "fallLevelFall",
+			posF: []testCaseGen{
+				ALGM_08032023,
 			},
 			negF: []testCaseGen{
 				GRPN_06282023,
