@@ -36,7 +36,7 @@ func StrategyNamed(name string) (Strategy, error) {
 func hasLowVolumeOrPrice(a *AnalyzedData) bool {
 	i := a.Indicators
 
-	return i.AvgVolume < 1_000_000 || i.AvgClose < 5.0
+	return i.AvgVolume < 1_000_000 || i.AvgClose < 5.0 || a.LastClose() < 5.0
 }
 
 //
@@ -176,11 +176,11 @@ func (s *FallLevelFall) SignalDetected(a *AnalyzedData) bool {
 		return false
 	}
 
-	if i.RSI.Value > 50 || i.MACD.Gap() >= 0.0 {
+	if i.MACD.Gap() >= 0.0 {
 		return false
 	}
 
-	if s.lastFall(a) > -3.0 {
+	if s.lastFall(a) < 3.0 {
 		return false
 	}
 
@@ -192,13 +192,13 @@ func (s *FallLevelFall) SignalType() SignalType {
 }
 
 func (s *FallLevelFall) SortWeight(a *AnalyzedData) float64 {
-	return -s.lastFall(a)
+	return s.lastFall(a)
 }
 
 func (s *FallLevelFall) lastFall(a *AnalyzedData) float64 {
 	minClose := min(a.LastClose(), a.PreviousClose())
 	maxClose := a.MaxOfNCloses(5)
-	change := percentage(minClose, maxClose)
+	change := percentage(maxClose, minClose)
 
 	return change
 }
