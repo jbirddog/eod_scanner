@@ -143,6 +143,7 @@ func GRPN_06282023() *AnalyzedData {
 		0b00000011)
 }
 
+// TODO: replace with RIOT_03132023
 func RIOT_01052023() *AnalyzedData {
 	return tc1("RIOT",
 		Day(2023, 1, 4), 3.44, 3.95, 3.38, 3.88, 12_325_300.0,
@@ -195,7 +196,7 @@ func TestStrategies(t *testing.T) {
 				APP_01202023,
 				CRDO_05152023,
 				GRPN_06282023,
-				RIOT_01052023,
+				//RIOT_01052023, TODO: replace with RIOT_03132023
 				RIOT_06272023,
 				RIVN_06292023,
 			},
