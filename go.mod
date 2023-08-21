@@ -1,3 +1,3 @@
 module github.com/jbirddog/eod_scanner
 
-go 1.20
+go 1.21

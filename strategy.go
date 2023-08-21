@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -18,10 +19,24 @@ type Strategy interface {
 	SortWeight(a *AnalyzedData) float64
 }
 
+var strategies = map[string]Strategy{
+	"fallLevelFall": &FallLevelFall{},
+	"monthClimb":    &MonthClimb{},
+	"monthFall":     &MonthFall{},
+}
+
+func StrategyNamed(name string) (Strategy, error) {
+	if strategy, found := strategies[name]; found {
+		return strategy, nil
+	}
+
+	return nil, fmt.Errorf("Unknown strategy name: '%s'", name)
+}
+
 func hasLowVolumeOrPrice(a *AnalyzedData) bool {
 	i := a.Indicators
 
-	return i.AvgVolume < 1_000_000 || i.AvgClose < 5.0
+	return i.AvgVolume < 1_000_000 || i.AvgClose < 5.0 || a.LastClose() < 5.0
 }
 
 //
@@ -142,4 +157,48 @@ func (s *MACDFuse) SignalType() SignalType {
 
 func (s *MACDFuse) SortWeight(a *AnalyzedData) float64 {
 	return -a.Indicators.MACD.Signal.Value
+}
+
+//
+// Fall Level Fall
+//
+
+type FallLevelFall struct{}
+
+func (s *FallLevelFall) Name() string {
+	return "Fall Level Fall"
+}
+
+func (s *FallLevelFall) SignalDetected(a *AnalyzedData) bool {
+	i := a.Indicators
+
+	if hasLowVolumeOrPrice(a) || math.Abs(a.LastChange()) > 0.25 {
+		return false
+	}
+
+	if i.MACD.Gap() >= 0.0 {
+		return false
+	}
+
+	if s.lastFall(a) < 3.0 {
+		return false
+	}
+
+	return true
+}
+
+func (s *FallLevelFall) SignalType() SignalType {
+	return Sell
+}
+
+func (s *FallLevelFall) SortWeight(a *AnalyzedData) float64 {
+	return s.lastFall(a)
+}
+
+func (s *FallLevelFall) lastFall(a *AnalyzedData) float64 {
+	minClose := min(a.LastClose(), a.PreviousClose())
+	maxClose := a.MaxOfNCloses(5)
+	change := percentage(maxClose, minClose)
+
+	return change
 }

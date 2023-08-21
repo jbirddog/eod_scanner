@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"math"
 	"os"
 	"time"
@@ -80,24 +79,21 @@ func (c *Config) setDefaultValues() {
 }
 
 func (c *Config) instantiateObjects() error {
-	switch c.WriterName {
-	case "markdown":
-		c.Writer = NewMarkdownWriter()
-	default:
-		return errors.New("Invalid writerName")
+	writer, err := WriterNamed(c.WriterName)
+	if err != nil {
+		return err
 	}
 
+	c.Writer = writer
 	c.Strategies = make([]Strategy, len(c.StrategyNames))
 
 	for i, name := range c.StrategyNames {
-		switch name {
-		case "monthClimb":
-			c.Strategies[i] = &MonthClimb{}
-		case "monthFall":
-			c.Strategies[i] = &MonthFall{}
-		default:
-			return fmt.Errorf("Invalid strategyName '%s'", name)
+		strategy, err := StrategyNamed(name)
+		if err != nil {
+			return err
 		}
+
+		c.Strategies[i] = strategy
 	}
 
 	return nil

@@ -7,11 +7,20 @@ import (
 )
 
 type Writer interface {
+	Name() string
 	WriteHeader(currentDay time.Time)
 	WriteSectionHeader(r *ScanResult)
 	WriteRecord(a *AnalyzedData, p *Position, risk float64)
 	WriteSectionFooter(r *ScanResult)
 	WriteFooter()
+}
+
+func WriterNamed(name string) (Writer, error) {
+	if name == "markdown" {
+		return NewMarkdownWriter(), nil
+	}
+
+	return nil, fmt.Errorf("Unknown writer name: '%s'", name)
 }
 
 const headerText = "EOD Report for"
@@ -64,6 +73,10 @@ func NewMarkdownWriter() *MarkdownWriter {
 	writer.setRecordFmt(fmts)
 
 	return writer
+}
+
+func (m *MarkdownWriter) Name() string {
+	return "Markdown"
 }
 
 func (m *MarkdownWriter) setTableHeader(lbls []string) {
