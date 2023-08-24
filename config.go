@@ -9,12 +9,12 @@ import (
 )
 
 type Config struct {
-	DataDir        string    `json:dataDir`
-	MarketDayCount int       `json:marketDayCount`
-	CurrentDay     time.Time `json:currentDay`
-	RiskPerTrade   float64   `json:riskPerTrade`
-	StrategyNames  []string  `json:strategyNames`
-	WriterName     string    `json:writerName`
+	DataDir        string    `json:"dataDir"`
+	MarketDayCount int       `json:"marketDayCount"`
+	CurrentDay     time.Time `json:"currentDay"`
+	RiskPerTrade   float64   `json:"riskPerTrade"`
+	StrategyNames  []string  `json:"strategyNames"`
+	WriterName     string    `json:"writerName"`
 	Writer         Writer
 	Strategies     []Strategy
 }
