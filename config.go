@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	DataDir        string    `json:"dataDir"`
+	Exchange       string    `json:"exchange"`
 	MarketDayCount int       `json:"marketDayCount"`
 	CurrentDay     time.Time `json:"currentDay"`
 	RiskPerTrade   float64   `json:"riskPerTrade"`
@@ -64,6 +65,10 @@ func (c *Config) validate() error {
 }
 
 func (c *Config) setDefaultValues() {
+	if c.Exchange == "" {
+		c.Exchange = "NASDAQ"
+	}
+
 	if c.MarketDayCount == 0 {
 		c.MarketDayCount = 65
 	}

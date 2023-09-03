@@ -40,10 +40,14 @@ func parse(dataDir string, exchange string, dates []time.Time, c chan parsedEODD
 	c <- parsedEODData{data: data, err: err}
 }
 
-func Scan(currentDay time.Time, marketDayCount int, dataDir string, strategies []Strategy) ([]*ScanResult, error) {
+func Scan(
+	currentDay time.Time,
+	marketDayCount int,
+	dataDir string,
+	exchange string,
+	strategies []Strategy,
+) ([]*ScanResult, error) {
 	dates := PreviousMarketDays(currentDay, marketDayCount)
-	// TODO: AMEX, NYSE
-	exchange := "NASDAQ"
 	eodData := make([][]*EODData, 0, marketDayCount)
 	dateBatches := batch(dates)
 	parseChan := make(chan parsedEODData, len(dateBatches))

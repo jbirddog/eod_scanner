@@ -17,6 +17,7 @@ func main() {
 	results, err := Scan(config.CurrentDay,
 		config.MarketDayCount,
 		config.DataDir,
+		config.Exchange,
 		config.Strategies)
 
 	if err != nil {
