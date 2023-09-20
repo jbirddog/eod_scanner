@@ -247,7 +247,7 @@ func (s *ThreeUps) SortWeight(a *AnalyzedData) float64 {
 
 	lastThree := a.EODData[len(a.EODData)-3:]
 
-	return lastThree[2].Close - lastThree[0].Close
+	return percentage(lastThree[2].Close, lastThree[0].Close)
 }
 
 //
@@ -292,5 +292,5 @@ func (s *ThreeDowns) SortWeight(a *AnalyzedData) float64 {
 
 	lastThree := a.EODData[len(a.EODData)-3:]
 
-	return lastThree[0].Close - lastThree[2].Close
+	return percentage(lastThree[0].Close, lastThree[2].Close)
 }
