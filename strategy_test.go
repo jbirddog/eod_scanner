@@ -75,7 +75,41 @@ func tc2(sym string,
 	return d
 }
 
+func tc3(sym string,
+	d1 time.Time, o1, h1, l1, c1, v1 float64,
+	d2 time.Time, o2, h2, l2, c2, v2 float64,
+	d3 time.Time, o3, h3, l3, c3, v3 float64,
+	r1, r2, r3, r4, r5 float64,
+) *AnalyzedData {
+	d := &AnalyzedData{Symbol: sym}
+
+	d.EODData = []*EODData{
+		&EODData{sym, d1, o1, h1, l1, c1, v1},
+		&EODData{sym, d2, o2, h2, l2, c2, v2},
+		&EODData{sym, d3, o3, h3, l3, c3, v3},
+	}
+
+	i := &d.Indicators
+	i.Init()
+
+	i.AvgVolume = 1_000_001.0
+	i.AvgClose = 5.01
+
+	setRSIs(i, r1, r2, r3, r4, r5)
+
+	return d
+}
+
 type testCaseGen func() *AnalyzedData
+
+func AFRM_08282023() *AnalyzedData {
+	return tc3("AFRM",
+		Day(2023, 8, 24), 14.55, 14.58, 13.74, 13.81, 24_674_200,
+		Day(2023, 8, 25), 15.09, 18.32, 15.00, 17.79, 85_735_900,
+		Day(2023, 8, 28), 18.10, 18.13, 17.07, 17.95, 29_435_800,
+		60.0, 61.0, 64.0, 66.0, 70.0,
+	)
+}
 
 func ALGM_08032023() *AnalyzedData {
 	return tc2("ALGM",
@@ -184,6 +218,14 @@ func RIVN_06292023() *AnalyzedData {
 		0b00000011)
 }
 
+func WBA_09012023() *AnalyzedData {
+	return tc3("WBA",
+		Day(2023, 8, 30), 25.63, 25.77, 25.45, 25.60, 5_883_700.0,
+		Day(2023, 8, 31), 25.59, 25.76, 25.18, 25.31, 10_794_500.0,
+		Day(2023, 1, 9), 25.17, 25.26, 23.39, 23.43, 33_164_400.0,
+		28.0, 25.0, 21.0, 19.0, 17.0)
+}
+
 func TestStrategies(t *testing.T) {
 	testCases := []struct {
 		s    string
@@ -219,6 +261,24 @@ func TestStrategies(t *testing.T) {
 			posF: []testCaseGen{
 				ALGM_08032023,
 				C_08032023,
+			},
+			negF: []testCaseGen{
+				GRPN_06282023,
+			},
+		},
+		{
+			s: "threeUps",
+			posF: []testCaseGen{
+				AFRM_08282023,
+			},
+			negF: []testCaseGen{
+				ALGM_08032023,
+			},
+		},
+		{
+			s: "threeDowns",
+			posF: []testCaseGen{
+				WBA_09012023,
 			},
 			negF: []testCaseGen{
 				GRPN_06282023,

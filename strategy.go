@@ -23,6 +23,8 @@ var strategies = map[string]Strategy{
 	"fallLevelFall": &FallLevelFall{},
 	"monthClimb":    &MonthClimb{},
 	"monthFall":     &MonthFall{},
+	"threeUps":      &ThreeUps{},
+	"threeDowns":    &ThreeDowns{},
 }
 
 func StrategyNamed(name string) (Strategy, error) {
@@ -201,4 +203,94 @@ func (s *FallLevelFall) lastFall(a *AnalyzedData) float64 {
 	change := percentage(maxClose, minClose)
 
 	return change
+}
+
+//
+// Three Ups
+//
+
+type ThreeUps struct{}
+
+func (s *ThreeUps) Name() string {
+	return "Three Ups"
+}
+
+func (s *ThreeUps) SignalDetected(a *AnalyzedData) bool {
+	if hasLowVolumeOrPrice(a) {
+		return false
+	}
+
+	i := a.Indicators
+
+	if i.RSI.Value < 50 || i.RSI.LastChange() < 0.0 {
+		return false
+	}
+
+	lastThree := a.EODData[len(a.EODData)-3:]
+
+	for i := 2; i > 0; i-- {
+		cur, prev := lastThree[i], lastThree[i-1]
+
+		if cur.Low < prev.Low || cur.Close < prev.Close {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (s *ThreeUps) SignalType() SignalType {
+	return Buy
+}
+
+func (s *ThreeUps) SortWeight(a *AnalyzedData) float64 {
+
+	lastThree := a.EODData[len(a.EODData)-3:]
+
+	return percentage(lastThree[2].Close, lastThree[0].Close)
+}
+
+//
+// Three Downs
+//
+
+type ThreeDowns struct{}
+
+func (s *ThreeDowns) Name() string {
+	return "Three Downs"
+}
+
+func (s *ThreeDowns) SignalDetected(a *AnalyzedData) bool {
+	if hasLowVolumeOrPrice(a) {
+		return false
+	}
+
+	i := a.Indicators
+
+	if i.RSI.Value > 50 || i.RSI.LastChange() > 0.0 {
+		return false
+	}
+
+	lastThree := a.EODData[len(a.EODData)-3:]
+
+	for i := 2; i > 0; i-- {
+		cur, prev := lastThree[i], lastThree[i-1]
+
+		if cur.High > prev.High || cur.Close > prev.Close {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (s *ThreeDowns) SignalType() SignalType {
+	return Sell
+}
+
+func (s *ThreeDowns) SortWeight(a *AnalyzedData) float64 {
+
+	lastThree := a.EODData[len(a.EODData)-3:]
+
+	return percentage(lastThree[0].Close, lastThree[2].Close)
 }
