@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestParseMinimalEODFile(t *testing.T) {
+func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 	cases := []struct {
 		rawData  []string
 		expected []*EODData
@@ -137,8 +137,10 @@ func TestParseMinimalEODFile(t *testing.T) {
 		},
 	}
 
+	parser := &EODExchangeStdCSVParser{}
+
 	for i, c := range cases {
-		actual, err := ParseEODFileContents(c.rawData)
+		actual, err := parser.parseFileContents(c.rawData)
 
 		if actual == nil {
 			if c.expected != nil {

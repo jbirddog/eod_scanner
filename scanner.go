@@ -35,8 +35,8 @@ type parsedEODData struct {
 	err  error
 }
 
-func parse(dataDir string, exchange string, dates []time.Time, c chan parsedEODData) {
-	data, err := ParseEODFiles(dataDir, exchange, dates)
+func parse(parser Parser, dates []time.Time, c chan parsedEODData) {
+	data, err := parser.Parse(dates)
 	c <- parsedEODData{data: data, err: err}
 }
 
@@ -52,8 +52,13 @@ func Scan(
 	dateBatches := batch(dates)
 	parseChan := make(chan parsedEODData, len(dateBatches))
 
+	parser := &EODExchangeStdCSVParser{
+		DataDir:  dataDir,
+		Exchange: exchange,
+	}
+
 	for _, dateBatch := range dateBatches {
-		go parse(dataDir, exchange, dateBatch, parseChan)
+		go parse(parser, dateBatch, parseChan)
 	}
 
 	for i := 0; i < len(dateBatches); i++ {
