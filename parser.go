@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"errors"
+	"fmt"
+	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -17,18 +21,48 @@ type EODData struct {
 	Volume float64
 }
 
-const header = "Symbol,Date,Open,High,Low,Close,Volume"
+// TODO: move time param into struct? makes config parse market days...
 
-func ParseEODFiles(dataDir string, exchange string, dates []time.Time) ([][]*EODData, error) {
+type Parser interface {
+	Parse([]time.Time) ([][]*EODData, error)
+}
+
+func loadFile(path string) ([]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	lines := make([]string, 0, 4096)
+
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return lines, nil
+}
+
+type EODExchStdCSVParser struct {
+	DataDir  string
+	Exchange string
+}
+
+func (p *EODExchStdCSVParser) Parse(dates []time.Time) ([][]*EODData, error) {
 	eodData := make([][]*EODData, len(dates))
 
 	for i, date := range dates {
-		rawData, err := LoadEODFile(dataDir, exchange, date)
+		rawData, err := p.loadFile(p.DataDir, p.Exchange, date)
 		if err != nil {
 			return nil, err
 		}
 
-		data, err := ParseEODFileContents(rawData)
+		data, err := p.parseFileContents(rawData)
 		if err != nil {
 			return nil, err
 		}
@@ -39,8 +73,17 @@ func ParseEODFiles(dataDir string, exchange string, dates []time.Time) ([][]*EOD
 	return eodData, nil
 }
 
-func ParseEODFileContents(rawData []string) ([]*EODData, error) {
-	if len(rawData) == 0 || rawData[0] != header {
+func (p *EODExchStdCSVParser) filePath(dir string, exchange string, date time.Time) string {
+	fileName := fmt.Sprintf("%s_%d%02d%02d.csv", exchange, date.Year(), date.Month(), date.Day())
+	return path.Join(dir, fileName)
+}
+
+func (p *EODExchStdCSVParser) loadFile(dir string, exchange string, date time.Time) ([]string, error) {
+	return loadFile(p.filePath(dir, exchange, date))
+}
+
+func (p *EODExchStdCSVParser) parseFileContents(rawData []string) ([]*EODData, error) {
+	if len(rawData) == 0 || rawData[0] != "Symbol,Date,Open,High,Low,Close,Volume" {
 		return nil, errors.New("Expected header as first line")
 	}
 
@@ -53,7 +96,7 @@ func ParseEODFileContents(rawData []string) ([]*EODData, error) {
 	data := make([]*EODData, len(rawData))
 
 	for i, raw := range rawData {
-		eodData, err := parseRow(raw)
+		eodData, err := p.parseRow(raw)
 
 		if err != nil {
 			return nil, err
@@ -65,7 +108,7 @@ func ParseEODFileContents(rawData []string) ([]*EODData, error) {
 	return data, nil
 }
 
-func parseRow(row string) (*EODData, error) {
+func (p *EODExchStdCSVParser) parseRow(row string) (*EODData, error) {
 	parts := strings.Split(row, ",")
 
 	if len(parts) != 7 {
@@ -74,13 +117,13 @@ func parseRow(row string) (*EODData, error) {
 
 	symbol := parts[0]
 
-	date, err := parseDate(parts[1])
+	date, err := p.parseDate(parts[1])
 	if err != nil {
 		return nil, err
 	}
 
 	var prices [4]float64
-	if err := parsePrices(parts[2:6], &prices); err != nil {
+	if err := p.parsePrices(parts[2:6], &prices); err != nil {
 		return nil, err
 	}
 
@@ -102,7 +145,7 @@ func parseRow(row string) (*EODData, error) {
 	return data, nil
 }
 
-func parseDate(field string) (time.Time, error) {
+func (p *EODExchStdCSVParser) parseDate(field string) (time.Time, error) {
 	date, err := time.Parse("02-Jan-2006", field)
 	if err == nil {
 		date = Day(date.Year(), date.Month(), date.Day())
@@ -111,7 +154,7 @@ func parseDate(field string) (time.Time, error) {
 	return date, err
 }
 
-func parsePrices(fields []string, prices *[4]float64) error {
+func (p *EODExchStdCSVParser) parsePrices(fields []string, prices *[4]float64) error {
 	if len(fields) != 4 {
 		return errors.New("Expected 4 price fields")
 	}
