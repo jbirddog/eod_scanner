@@ -10,7 +10,7 @@ type Writer interface {
 	Name() string
 	WriteHeader(currentDay time.Time)
 	WriteSectionHeader(r *ScanResult)
-	WriteRecord(a *AnalyzedData, p *Position, risk float64)
+	WriteRecord(a *AnalyzedData, p Position, risk float64)
 	WriteSectionFooter(r *ScanResult)
 	WriteFooter()
 }
@@ -96,7 +96,7 @@ func (m *MarkdownWriter) WriteSectionHeader(r *ScanResult) {
 	fmt.Printf("## %s '%s'\n\n%s", sectionHeaderText, r.Strategy.Name(), m.tableHeader)
 }
 
-func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64) {
+func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p Position, risk float64) {
 	i := a.Indicators
 	lastClose := a.LastClose()
 
@@ -113,10 +113,10 @@ func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p *Position, risk float64)
 		i.RSI.Value,
 		i.MACD.Line,
 		i.MACD.Signal.Value,
-		p.Type.String(),
-		p.Shares,
-		p.StopLoss,
-		p.Capital)
+		p.Type().String(),
+		p.Shares(),
+		p.StopLoss(),
+		p.Capital())
 }
 
 func (m *MarkdownWriter) WriteSectionFooter(r *ScanResult) {

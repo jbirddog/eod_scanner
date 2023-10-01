@@ -19,15 +19,43 @@ func (t PositionType) String() string {
 	}
 }
 
-type Position struct {
-	Type     PositionType
-	Shares   int
-	Entry    float64
-	Capital  float64
-	StopLoss float64
+type Position interface {
+	Type() PositionType
+	Shares() int
+	Entry() float64
+	Capital() float64
+	StopLoss() float64
 }
 
-func PositionFromAnalyzedData(data *AnalyzedData, risk float64, signalType SignalType) *Position {
+type DefaultPosition struct {
+	_type     PositionType
+	_shares   int
+	_entry    float64
+	_capital  float64
+	_stopLoss float64
+}
+
+func (p *DefaultPosition) Type() PositionType {
+	return p._type
+}
+
+func (p *DefaultPosition) Shares() int {
+	return p._shares
+}
+
+func (p *DefaultPosition) Entry() float64 {
+	return p._entry
+}
+
+func (p *DefaultPosition) Capital() float64 {
+	return p._capital
+}
+
+func (p *DefaultPosition) StopLoss() float64 {
+	return p._stopLoss
+}
+
+func PositionFromAnalyzedData(data *AnalyzedData, risk float64, signalType SignalType) Position {
 	entry := data.LastClose()
 	stopLoss := data.Indicators.SMA20.Value
 
@@ -45,11 +73,11 @@ func PositionFromAnalyzedData(data *AnalyzedData, risk float64, signalType Signa
 	shares := int(risk / riskPerShare)
 	capital := float64(shares) * entry
 
-	return &Position{
-		Type:     positionType,
-		Shares:   shares,
-		Entry:    entry,
-		Capital:  capital,
-		StopLoss: stopLoss,
+	return &DefaultPosition{
+		_type:     positionType,
+		_shares:   shares,
+		_entry:    entry,
+		_capital:  capital,
+		_stopLoss: stopLoss,
 	}
 }
