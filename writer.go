@@ -41,7 +41,8 @@ var columns = []struct {
 	{"Close", "%.2f (%.2f %.2f %.2f)"},
 	{"RSI", "%.2f"},
 	{"MACD", "%.2f %.2f"},
-	{"Position", "%s ~%d, %.2f, ~%.2f"},
+	{"Entry", "%s ~%d %.2f"},
+	{"Exit", "SL %.2f"},
 }
 
 func columnFields() ([]string, []string) {
@@ -108,15 +109,13 @@ func (m *MarkdownWriter) WriteRecord(a *AnalyzedData, p Position, risk float64) 
 		i.BB.Upper,
 		i.BB.Middle,
 		i.BB.Lower,
-		//percentage(lastClose, i.EMA8.Value),
-		//percentage(lastClose, i.SMA20.Value),
 		i.RSI.Value,
 		i.MACD.Line,
 		i.MACD.Signal.Value,
 		p.Type().String(),
 		p.Shares(),
-		p.StopLoss(),
-		p.Capital())
+		p.Capital(),
+		p.StopLoss())
 }
 
 func (m *MarkdownWriter) WriteSectionFooter(r *ScanResult) {
