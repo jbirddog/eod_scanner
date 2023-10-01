@@ -4,6 +4,17 @@ import (
 	"testing"
 )
 
+func TestEODExchStdCSVFilePath(t *testing.T) {
+	parser := &EODExchStdCSVParser{}
+
+	actual := parser.filePath("/data", "NASDAQ", Day(2023, 7, 4))
+	expected := "/data/NASDAQ_20230704.csv"
+
+	if actual != expected {
+		t.Fatalf("Expected eod file name %s, got %s", expected, actual)
+	}
+}
+
 func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 	cases := []struct {
 		rawData  []string
@@ -137,7 +148,7 @@ func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 		},
 	}
 
-	parser := &EODExchangeStdCSVParser{}
+	parser := &EODExchStdCSVParser{}
 
 	for i, c := range cases {
 		actual, err := parser.parseFileContents(c.rawData)

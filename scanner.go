@@ -52,7 +52,7 @@ func Scan(
 	dateBatches := batch(dates)
 	parseChan := make(chan parsedEODData, len(dateBatches))
 
-	parser := &EODExchangeStdCSVParser{
+	parser := &EODExchStdCSVParser{
 		DataDir:  dataDir,
 		Exchange: exchange,
 	}
