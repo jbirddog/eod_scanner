@@ -25,6 +25,14 @@ func (a *AnalyzedData) LastClose() float64 {
 	return a.EODData[len(a.EODData)-1].Close
 }
 
+func (a *AnalyzedData) LastHigh() float64 {
+	return a.EODData[len(a.EODData)-1].High
+}
+
+func (a *AnalyzedData) LastLow() float64 {
+	return a.EODData[len(a.EODData)-1].Low
+}
+
 func (a *AnalyzedData) PreviousClose() float64 {
 	return a.EODData[len(a.EODData)-2].Close
 }

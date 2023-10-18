@@ -20,11 +20,13 @@ type Strategy interface {
 }
 
 var strategies = map[string]Strategy{
-	"fallLevelFall": &FallLevelFall{},
-	"monthClimb":    &MonthClimb{},
-	"monthFall":     &MonthFall{},
-	"threeUps":      &ThreeUps{},
-	"threeDowns":    &ThreeDowns{},
+	"fallLevelFall":  &FallLevelFall{},
+	"monthClimb":     &MonthClimb{},
+	"monthFall":      &MonthFall{},
+	"threeUps":       &ThreeUps{},
+	"threeDowns":     &ThreeDowns{},
+	"failedBBTop":    &FailedBBTop{},
+	"failedBBBottom": &FailedBBBottom{},
 }
 
 func StrategyNamed(name string) (Strategy, error) {
@@ -293,4 +295,60 @@ func (s *ThreeDowns) SortWeight(a *AnalyzedData) float64 {
 	lastThree := a.EODData[len(a.EODData)-3:]
 
 	return percentage(lastThree[0].Close, lastThree[2].Close)
+}
+
+//
+// Failed BB Top
+//
+
+type FailedBBTop struct{}
+
+func (s *FailedBBTop) Name() string {
+	return "Failed BB Top"
+}
+
+func (s *FailedBBTop) SignalDetected(a *AnalyzedData) bool {
+	if hasLowVolumeOrPrice(a) {
+		return false
+	}
+
+	bb := a.Indicators.BB
+
+	return a.PreviousClose() > bb.Upper && a.LastClose() < bb.Upper
+}
+
+func (s *FailedBBTop) SignalType() SignalType {
+	return Sell
+}
+
+func (s *FailedBBTop) SortWeight(a *AnalyzedData) float64 {
+	return a.PreviousClose() - a.LastClose()
+}
+
+//
+// Failed BB Bottom
+//
+
+type FailedBBBottom struct{}
+
+func (s *FailedBBBottom) Name() string {
+	return "Failed BB Bottom"
+}
+
+func (s *FailedBBBottom) SignalDetected(a *AnalyzedData) bool {
+	if hasLowVolumeOrPrice(a) {
+		return false
+	}
+
+	bb := a.Indicators.BB
+
+	return a.PreviousClose() < bb.Lower && a.LastClose() > bb.Lower
+}
+
+func (s *FailedBBBottom) SignalType() SignalType {
+	return Buy
+}
+
+func (s *FailedBBBottom) SortWeight(a *AnalyzedData) float64 {
+	return a.LastClose() - a.PreviousClose()
 }
