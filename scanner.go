@@ -3,6 +3,8 @@ package main
 import (
 	"sort"
 	"time"
+
+	"github.com/jbirddog/marketday"
 )
 
 type ScanResult struct {
@@ -47,7 +49,7 @@ func Scan(
 	exchange string,
 	strategies []Strategy,
 ) ([]*ScanResult, error) {
-	dates := PreviousMarketDays(currentDay, marketDayCount)
+	dates := marketday.BeforeN(currentDay, marketDayCount)
 	eodData := make([][]*EODData, 0, marketDayCount)
 	dateBatches := batch(dates)
 	parseChan := make(chan parsedEODData, len(dateBatches))
