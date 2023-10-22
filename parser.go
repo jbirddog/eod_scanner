@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jbirddog/marketday"
 )
 
 type EODData struct {
@@ -148,7 +150,7 @@ func (p *EODExchStdCSVParser) parseRow(row string) (*EODData, error) {
 func (p *EODExchStdCSVParser) parseDate(field string) (time.Time, error) {
 	date, err := time.Parse("02-Jan-2006", field)
 	if err == nil {
-		date = Day(date.Year(), date.Month(), date.Day())
+		date = marketday.Day(date.Year(), date.Month(), date.Day())
 	}
 
 	return date, err
