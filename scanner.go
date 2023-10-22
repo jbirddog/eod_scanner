@@ -49,7 +49,7 @@ func Scan(
 	exchange string,
 	strategies []Strategy,
 ) ([]*ScanResult, error) {
-	dates := marketday.BeforeN(currentDay, marketDayCount)
+	dates := marketday.PreviousMarketDays(currentDay, marketDayCount)
 	eodData := make([][]*EODData, 0, marketDayCount)
 	dateBatches := batch(dates)
 	parseChan := make(chan parsedEODData, len(dateBatches))

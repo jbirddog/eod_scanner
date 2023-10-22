@@ -30,7 +30,7 @@ const sectionHeaderText = "Strategy"
 const sectionFooterText = "symbols"
 
 func headerDateString(currentDay time.Time) string {
-	return marketday.Before(currentDay).Format("01/02/2006")
+	return marketday.PreviousMarketDay(currentDay).Format("01/02/2006")
 }
 
 var columns = []struct {
