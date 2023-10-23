@@ -68,15 +68,17 @@ type SMA struct {
 	cumulative float64
 	cb         []float64
 	i          int
+	pf         float64
 }
 
 func (s *SMA) Init(periods int) {
 	s.Periods = periods
 	s.cb = make([]float64, periods, periods)
+	s.pf = float64(periods)
 }
 
 func (s *SMA) Add(new float64) {
-	s.cumulative += new - s.cb[s.i%s.Periods]
+	s.cumulative += new - s.cb[s.i]
 	s.cb[s.i] = new
 	s.i++
 
@@ -84,7 +86,7 @@ func (s *SMA) Add(new float64) {
 		s.i = 0
 	}
 
-	s.Value = s.cumulative / float64(s.Periods)
+	s.Value = s.cumulative / s.pf
 }
 
 //
