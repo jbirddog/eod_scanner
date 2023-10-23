@@ -13,20 +13,8 @@ import (
 	"github.com/jbirddog/marketday"
 )
 
-type EODData struct {
-	Symbol string
-	Date   time.Time
-	Open   float64
-	High   float64
-	Low    float64
-	Close  float64
-	Volume float64
-}
-
-// TODO: move time param into struct? makes config parse market days...
-
 type Parser interface {
-	Parse([]time.Time) ([][]*EODData, error)
+	Parse([]time.Time) ([][]*marketday.EODData, error)
 }
 
 func loadFile(path string) ([]string, error) {
@@ -55,8 +43,8 @@ type EODExchStdCSVParser struct {
 	Exchange string
 }
 
-func (p *EODExchStdCSVParser) Parse(dates []time.Time) ([][]*EODData, error) {
-	eodData := make([][]*EODData, len(dates))
+func (p *EODExchStdCSVParser) Parse(dates []time.Time) ([][]*marketday.EODData, error) {
+	eodData := make([][]*marketday.EODData, len(dates))
 
 	for i, date := range dates {
 		rawData, err := p.loadFile(p.DataDir, p.Exchange, date)
@@ -84,7 +72,7 @@ func (p *EODExchStdCSVParser) loadFile(dir string, exchange string, date time.Ti
 	return loadFile(p.filePath(dir, exchange, date))
 }
 
-func (p *EODExchStdCSVParser) parseFileContents(rawData []string) ([]*EODData, error) {
+func (p *EODExchStdCSVParser) parseFileContents(rawData []string) ([]*marketday.EODData, error) {
 	if len(rawData) == 0 || rawData[0] != "Symbol,Date,Open,High,Low,Close,Volume" {
 		return nil, errors.New("Expected header as first line")
 	}
@@ -95,7 +83,7 @@ func (p *EODExchStdCSVParser) parseFileContents(rawData []string) ([]*EODData, e
 		return nil, errors.New("Expected records to parse")
 	}
 
-	data := make([]*EODData, len(rawData))
+	data := make([]*marketday.EODData, len(rawData))
 
 	for i, raw := range rawData {
 		eodData, err := p.parseRow(raw)
@@ -110,7 +98,7 @@ func (p *EODExchStdCSVParser) parseFileContents(rawData []string) ([]*EODData, e
 	return data, nil
 }
 
-func (p *EODExchStdCSVParser) parseRow(row string) (*EODData, error) {
+func (p *EODExchStdCSVParser) parseRow(row string) (*marketday.EODData, error) {
 	parts := strings.Split(row, ",")
 
 	if len(parts) != 7 {
@@ -134,7 +122,7 @@ func (p *EODExchStdCSVParser) parseRow(row string) (*EODData, error) {
 		return nil, err
 	}
 
-	data := &EODData{
+	data := &marketday.EODData{
 		Symbol: symbol,
 		Date:   date,
 		Open:   prices[0],

@@ -3,6 +3,8 @@ package main
 import (
 	"container/ring"
 	"math"
+
+	"github.com/jbirddog/marketday"
 )
 
 type IndicatorFlags uint64
@@ -30,7 +32,7 @@ func (i *Indicators) Init() {
 	i.BB.Init(&i.SMA20, 2)
 }
 
-func (i *Indicators) Add(new *EODData, period int) {
+func (i *Indicators) Add(new *marketday.EODData, period int) {
 	i.AvgVolume = runningAvg(i.AvgVolume, period, new.Volume)
 
 	close := new.Close

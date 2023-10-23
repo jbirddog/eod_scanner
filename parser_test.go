@@ -20,7 +20,7 @@ func TestEODExchStdCSVFilePath(t *testing.T) {
 func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 	cases := []struct {
 		rawData  []string
-		expected []*EODData
+		expected []*marketday.EODData
 	}{
 		// single record
 		{
@@ -28,8 +28,8 @@ func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 				"Symbol,Date,Open,High,Low,Close,Volume",
 				"AACG,30-May-2023,1.5,1.5745,1.48,1.4906,16900",
 			},
-			[]*EODData{
-				&EODData{
+			[]*marketday.EODData{
+				&marketday.EODData{
 					Symbol: "AACG",
 					Date:   marketday.Day(2023, 5, 30),
 					Open:   1.5,
@@ -47,8 +47,8 @@ func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 				"AACG,30-May-2023,1.5,1.5745,1.48,1.4906,16900",
 				"AAL,30-May-2023,14.44,14.75,14.42,14.62,20424600",
 			},
-			[]*EODData{
-				&EODData{
+			[]*marketday.EODData{
+				&marketday.EODData{
 					Symbol: "AACG",
 					Date:   marketday.Day(2023, 5, 30),
 					Open:   1.5,
@@ -57,7 +57,7 @@ func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 					Close:  1.4906,
 					Volume: 16900,
 				},
-				&EODData{
+				&marketday.EODData{
 					Symbol: "AAL",
 					Date:   marketday.Day(2023, 5, 30),
 					Open:   14.44,
@@ -74,8 +74,8 @@ func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 				"Symbol,Date,Open,High,Low,Close,Volume",
 				"VIA,30-Jun-2023,7,7.1846,6.69,6.96,61000",
 			},
-			[]*EODData{
-				&EODData{
+			[]*marketday.EODData{
+				&marketday.EODData{
 					Symbol: "VIA",
 					Date:   marketday.Day(2023, 6, 30),
 					Open:   7.0,

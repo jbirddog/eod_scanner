@@ -2,13 +2,15 @@ package main
 
 import (
 	"math"
+
+	"github.com/jbirddog/marketday"
 )
 
 func sameFloat(a float64, b float64) bool {
 	return math.Abs(a-b) <= 1e-9
 }
 
-func sameData(a *EODData, b *EODData) bool {
+func sameData(a *marketday.EODData, b *marketday.EODData) bool {
 	return a.Symbol == b.Symbol &&
 		a.Date == b.Date &&
 		sameFloat(a.Open, b.Open) &&

@@ -17,9 +17,9 @@ func tc1(sym string,
 ) *AnalyzedData {
 	d := &AnalyzedData{Symbol: sym}
 
-	d.EODData = []*EODData{
-		&EODData{sym, d1, o1, h1, l1, c1, v1},
-		&EODData{sym, d2, o2, h2, l2, c2, v2},
+	d.EODData = []*marketday.EODData{
+		&marketday.EODData{sym, d1, o1, h1, l1, c1, v1},
+		&marketday.EODData{sym, d2, o2, h2, l2, c2, v2},
 	}
 
 	i := &d.Indicators
@@ -52,12 +52,12 @@ func tc2(sym string,
 ) *AnalyzedData {
 	d := &AnalyzedData{Symbol: sym}
 
-	d.EODData = []*EODData{
-		&EODData{sym, d1, o1, h1, l1, c1, v1},
-		&EODData{sym, d2, o2, h2, l2, c2, v2},
-		&EODData{sym, d3, o3, h3, l3, c3, v3},
-		&EODData{sym, d4, o4, h4, l4, c4, v4},
-		&EODData{sym, d5, o5, h5, l5, c5, v5},
+	d.EODData = []*marketday.EODData{
+		&marketday.EODData{sym, d1, o1, h1, l1, c1, v1},
+		&marketday.EODData{sym, d2, o2, h2, l2, c2, v2},
+		&marketday.EODData{sym, d3, o3, h3, l3, c3, v3},
+		&marketday.EODData{sym, d4, o4, h4, l4, c4, v4},
+		&marketday.EODData{sym, d5, o5, h5, l5, c5, v5},
 	}
 
 	i := &d.Indicators
@@ -85,10 +85,10 @@ func tc3(sym string,
 ) *AnalyzedData {
 	d := &AnalyzedData{Symbol: sym}
 
-	d.EODData = []*EODData{
-		&EODData{sym, d1, o1, h1, l1, c1, v1},
-		&EODData{sym, d2, o2, h2, l2, c2, v2},
-		&EODData{sym, d3, o3, h3, l3, c3, v3},
+	d.EODData = []*marketday.EODData{
+		&marketday.EODData{sym, d1, o1, h1, l1, c1, v1},
+		&marketday.EODData{sym, d2, o2, h2, l2, c2, v2},
+		&marketday.EODData{sym, d3, o3, h3, l3, c3, v3},
 	}
 
 	i := &d.Indicators
