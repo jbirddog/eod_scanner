@@ -6,6 +6,8 @@ import (
 	"math"
 	"os"
 	"time"
+
+	"github.com/jbirddog/marketday"
 )
 
 type Config struct {
@@ -75,7 +77,7 @@ func (c *Config) setDefaultValues() {
 
 	if c.CurrentDay.IsZero() {
 		now := time.Now()
-		c.CurrentDay = Day(now.Year(), now.Month(), now.Day())
+		c.CurrentDay = marketday.Day(now.Year(), now.Month(), now.Day())
 	}
 
 	if c.WriterName == "" {

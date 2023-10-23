@@ -2,12 +2,14 @@ package main
 
 import (
 	"testing"
+
+	"github.com/jbirddog/marketday"
 )
 
 func TestEODExchStdCSVFilePath(t *testing.T) {
 	parser := &EODExchStdCSVParser{}
 
-	actual := parser.filePath("/data", "NASDAQ", Day(2023, 7, 4))
+	actual := parser.filePath("/data", "NASDAQ", marketday.Day(2023, 7, 4))
 	expected := "/data/NASDAQ_20230704.csv"
 
 	if actual != expected {
@@ -29,7 +31,7 @@ func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 			[]*EODData{
 				&EODData{
 					Symbol: "AACG",
-					Date:   Day(2023, 5, 30),
+					Date:   marketday.Day(2023, 5, 30),
 					Open:   1.5,
 					High:   1.5745,
 					Low:    1.48,
@@ -48,7 +50,7 @@ func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 			[]*EODData{
 				&EODData{
 					Symbol: "AACG",
-					Date:   Day(2023, 5, 30),
+					Date:   marketday.Day(2023, 5, 30),
 					Open:   1.5,
 					High:   1.5745,
 					Low:    1.48,
@@ -57,7 +59,7 @@ func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 				},
 				&EODData{
 					Symbol: "AAL",
-					Date:   Day(2023, 5, 30),
+					Date:   marketday.Day(2023, 5, 30),
 					Open:   14.44,
 					High:   14.75,
 					Low:    14.42,
@@ -75,7 +77,7 @@ func TestParseMinimalEODExchangeStdCSVFile(t *testing.T) {
 			[]*EODData{
 				&EODData{
 					Symbol: "VIA",
-					Date:   Day(2023, 6, 30),
+					Date:   marketday.Day(2023, 6, 30),
 					Open:   7.0,
 					High:   7.1846,
 					Low:    6.69,
