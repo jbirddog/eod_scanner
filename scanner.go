@@ -33,7 +33,7 @@ func (s *ScanResult) Sort() {
 }
 
 type parsedEODData struct {
-	data [][]*EODData
+	data [][]*marketday.EODData
 	err  error
 }
 
@@ -50,7 +50,7 @@ func Scan(
 	strategies []Strategy,
 ) ([]*ScanResult, error) {
 	dates := marketday.PreviousMarketDays(currentDay, marketDayCount)
-	eodData := make([][]*EODData, 0, marketDayCount)
+	eodData := make([][]*marketday.EODData, 0, marketDayCount)
 	dateBatches := batch(dates)
 	parseChan := make(chan parsedEODData, len(dateBatches))
 

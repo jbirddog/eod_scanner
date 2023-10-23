@@ -11,7 +11,7 @@ func main() {
 	configFile := flag.String("config", "", "Path to config file")
 	cpuProfile := flag.String("cpuprofile", "", "Write cpu profile to file")
 	memProfile := flag.String("memprofile", "", "Write memory profile to file")
-	
+
 	flag.Parse()
 
 	if *cpuProfile != "" {
@@ -43,7 +43,7 @@ func main() {
 		config.CurrentDay,
 		config.RiskPerTrade,
 		config.Writer)
-		
+
 	if *memProfile != "" {
 		file, err := os.Create(*memProfile)
 		if err != nil {

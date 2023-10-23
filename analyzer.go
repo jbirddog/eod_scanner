@@ -3,19 +3,21 @@ package main
 import (
 	"sort"
 	"time"
+
+	"github.com/jbirddog/marketday"
 )
 
 type AnalyzedData struct {
 	Symbol     string
 	DataPoints int
-	EODData    []*EODData
+	EODData    []*marketday.EODData
 	Indicators Indicators
 }
 
 func NewAnalyzedData(symbol string, days int) *AnalyzedData {
 	data := &AnalyzedData{
 		Symbol:  symbol,
-		EODData: make([]*EODData, days),
+		EODData: make([]*marketday.EODData, days),
 	}
 	data.Indicators.Init()
 	return data
@@ -65,7 +67,7 @@ func (a *AnalyzedData) LastVolumeMultiplier() float64 {
 
 type AnalyzedDataBySymbol = map[string]*AnalyzedData
 
-func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
+func Analyze(eodData [][]*marketday.EODData) AnalyzedDataBySymbol {
 	analyzed := make(AnalyzedDataBySymbol)
 	days := len(eodData)
 
@@ -88,7 +90,7 @@ func Analyze(eodData [][]*EODData) AnalyzedDataBySymbol {
 	return analyzed
 }
 
-func addEODData(data *AnalyzedData, record *EODData, day int) {
+func addEODData(data *AnalyzedData, record *marketday.EODData, day int) {
 	data.Indicators.Add(record, day)
 	data.EODData[day] = record
 	data.DataPoints += 1
