@@ -1,5 +1,7 @@
 *~
 eod_scanner
+eod_scanner.prof
+eod_scanner.mprof
 .env
 .config.json
 
