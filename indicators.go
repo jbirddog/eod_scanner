@@ -66,23 +66,23 @@ type SMA struct {
 	Periods    int
 	Value      float64
 	cumulative float64
-	ring       *ring.Ring
+	cb         []float64
+	i          int
 }
 
 func (s *SMA) Init(periods int) {
 	s.Periods = periods
-	s.ring = ring.New(periods)
+	s.cb = make([]float64, periods, periods)
 }
 
 func (s *SMA) Add(new float64) {
-	s.cumulative += new
+	s.cumulative += new - s.cb[s.i%s.Periods]
+	s.cb[s.i] = new
+	s.i++
 
-	if s.ring.Value != nil {
-		s.cumulative -= s.ring.Value.(float64)
+	if s.i == s.Periods {
+		s.i = 0
 	}
-
-	s.ring.Value = new
-	s.ring = s.ring.Next()
 
 	s.Value = s.cumulative / float64(s.Periods)
 }
