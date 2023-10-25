@@ -4,6 +4,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/jbirddog/eodparser"
 	"github.com/jbirddog/marketday"
 )
 
@@ -37,7 +38,7 @@ type parsedEODData struct {
 	err  error
 }
 
-func parse(parser Parser, dates []time.Time, c chan parsedEODData) {
+func parse(parser eodparser.Parser, dates []time.Time, c chan parsedEODData) {
 	data, err := parser.Parse(dates)
 	c <- parsedEODData{data: data, err: err}
 }
@@ -54,7 +55,7 @@ func Scan(
 	dateBatches := batch(dates)
 	parseChan := make(chan parsedEODData, len(dateBatches))
 
-	parser := &EODExchStdCSVParser{
+	parser := &eodparser.EODExchStdCSVParser{
 		DataDir:  dataDir,
 		Exchange: exchange,
 	}
