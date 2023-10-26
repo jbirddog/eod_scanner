@@ -1,4 +1,6 @@
 github.com/jbirddog/eodparser v0.0.0-20231025201631-b10873a6b243 h1:odgbEct1ZiR48U2dMyHWLI0wUHWwUXqL8ei0x4LBRjo=
 github.com/jbirddog/eodparser v0.0.0-20231025201631-b10873a6b243/go.mod h1:qTJH1QCqYt23exA1CF6bPVL/yvSWbHv88GNqr9f0JR4=
+github.com/jbirddog/eodparser v0.0.0-20231025203900-e3976bcd3998 h1:Y45RWJZeIPBjbeXh/8zkMoqwoKXBab35GIi5H//poYI=
+github.com/jbirddog/eodparser v0.0.0-20231025203900-e3976bcd3998/go.mod h1:qTJH1QCqYt23exA1CF6bPVL/yvSWbHv88GNqr9f0JR4=
 github.com/jbirddog/marketday v0.0.0-20231025192034-f2cd444d6817 h1:2857WOPQll+3mA6f1gqdUmEnK8HEJH0AK/l8xuidBco=
 github.com/jbirddog/marketday v0.0.0-20231025192034-f2cd444d6817/go.mod h1:wyywEdJhzejJ4MxO5pDVzNZtnXaL0BwrQa/eOVWS/aw=
